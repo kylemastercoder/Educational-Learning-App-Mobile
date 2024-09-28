@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "educational_webapp",
+    "name": "Educational Web App",
     "slug": "educational_webapp",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0CC25F"
     },
     "ios": {
       "supportsTablet": true
@@ -23,11 +23,17 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to allow you to upload images."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
