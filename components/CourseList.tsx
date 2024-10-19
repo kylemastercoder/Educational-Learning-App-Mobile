@@ -4,17 +4,21 @@ import React from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import { useRouter } from "expo-router";
+import { useGetUser } from "@/hooks/getUser"; // Assuming this hook fetches the user data
 
 interface Course {
   id: string;
   name: string;
   imageUrl: string;
   moduleCount: number;
+  progress: number; // Added progress field
 }
 
 const CourseList = () => {
   const router = useRouter();
+  const { userData } = useGetUser(); // Get user data
   const [courses, setCourses] = React.useState<Course[]>([]);
+
   React.useEffect(() => {
     const getModules = async (courseId: string) => {
       try {
@@ -42,26 +46,52 @@ const CourseList = () => {
       }
     };
 
+    const getViewedCourses = async () => {
+      if (!userData?.clerkId) return []; // Ensure userId is available
+
+      try {
+        const viewedQuery = query(
+          collection(db, "ViewedCourse"),
+          where("userId", "array-contains", userData.clerkId) // Fetch viewed courses for the user
+        );
+        const viewedSnapshot = await getDocs(viewedQuery);
+        const viewedCourseIds = viewedSnapshot.docs.map(
+          (doc) => doc.data().courseId
+        ); // Get course IDs of viewed courses
+        return viewedCourseIds;
+      } catch (error) {
+        console.error("Error fetching viewed courses:", error);
+        return [];
+      }
+    };
+
     const fetchCourses = async () => {
       try {
         const courseQuery = query(collection(db, "Courses"));
         const courseSnapshot = await getDocs(courseQuery);
 
         if (!courseSnapshot.empty) {
+          const viewedCourseIds = await getViewedCourses(); // Fetch viewed courses IDs
+
           // Use `Promise.all` to handle multiple async calls to `getModules`
           const courseDocs = await Promise.all(
             courseSnapshot.docs.map(async (doc) => {
               const courseData = doc.data();
               const modulesResponse = await getModules(doc.id);
+              const totalModules = modulesResponse.modules.length || 0;
+
+              // Determine progress based on viewed courses
+              const isViewed = viewedCourseIds.includes(doc.id);
+              const progress = isViewed
+                ? Math.floor((totalModules / totalModules) * 100)
+                : 0; // You can change this logic if you have a specific progress metric
 
               return {
                 id: doc.id,
                 name: courseData.name,
                 imageUrl: courseData.imageUrl,
-                moduleCount:
-                  modulesResponse.status === 200
-                    ? (modulesResponse.modules?.length ?? 0)
-                    : 0,
+                moduleCount: totalModules,
+                progress: progress,
               };
             })
           );
@@ -75,7 +105,8 @@ const CourseList = () => {
     };
 
     fetchCourses();
-  }, []);
+  }, [userData]); // Added userData as a dependency to re-fetch courses when user data changes
+
   return (
     <FlatList
       data={courses}
@@ -107,6 +138,13 @@ const CourseList = () => {
             >
               {item.moduleCount} modules
             </Text>
+            <View className="w-full h-2 bg-gray-300 rounded-full mt-2">
+              <View
+                style={{ width: `${item.progress}%` }} // Set progress width based on calculated progress
+                className="h-full bg-green-500 rounded-full"
+              />
+            </View>
+            <Text className="self-start text-xs mt-1">{item.progress}%</Text>
           </View>
         </TouchableOpacity>
       )}

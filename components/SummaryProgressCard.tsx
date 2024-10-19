@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
@@ -26,7 +27,10 @@ const SummaryProgressCard = ({
         />
       </View>
       <Text className="self-start text-xs mt-1">{progress}%</Text>
-      <TouchableOpacity className="w-full bg-green-500 rounded-full p-3 mt-4 flex-row justify-center items-center">
+      <TouchableOpacity
+        onPress={() => router.push("/(root)/(tabs)/history")}
+        className="w-full bg-green-500 rounded-full p-3 mt-4 flex-row justify-center items-center"
+      >
         <Text className="text-white font-semibold">{buttonLabel}</Text>
       </TouchableOpacity>
     </View>

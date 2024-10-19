@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Audio } from "expo-av";
+import { make_request } from "@/app/(api)/gemini";
 
 const CodeRunner = ({ correctOutput }: { correctOutput: string }) => {
-  // Initialize code state with a C code template
   const [code, setCode] = useState(`
 #include <stdio.h>
 
@@ -23,6 +23,7 @@ int main() {
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [explanations, setExplanations] = useState<string[]>([]); // New state for explanations
 
   async function playSound(url: string) {
     console.log("Loading Sound");
@@ -59,6 +60,7 @@ int main() {
     playSound(
       "https://firebasestorage.googleapis.com/v0/b/educational-webapp.appspot.com/o/sounds%2Floading.mp3?alt=media&token=46337b1c-907f-45cf-b9c3-b2fd5606129d"
     );
+
     try {
       const response = await axios.post(
         "https://api.jdoodle.com/v1/execute",
@@ -78,6 +80,8 @@ int main() {
           "https://firebasestorage.googleapis.com/v0/b/educational-webapp.appspot.com/o/sounds%2Ferror.mp3?alt=media&token=5c1a1ceb-0a0d-4d9e-812b-8a803bd423ca"
         );
       }
+      // Fetch explanations for each line of code
+      await fetchExplanations(code);
     } catch (error: any) {
       setOutput(
         "Error running code: " +
@@ -88,6 +92,27 @@ int main() {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to fetch explanations from the AI service
+  const fetchExplanations = async (code: string) => {
+    try {
+      console.log("Fetching explanations for code:", code); // Log the code being sent
+
+      // Call your make_request function with the code as the prompt
+      const explanation = await make_request(code);
+
+      if (explanation) {
+        // Split the explanation by lines if necessary and set it in the state
+        const lineExplanations = explanation.split("\n"); // Assuming explanations are line-separated
+        setExplanations(lineExplanations);
+      } else {
+        setExplanations(["No explanations available."]);
+      }
+    } catch (error) {
+      console.error("Error fetching explanations: ", error);
+      setExplanations(["Error fetching explanations"]);
     }
   };
 
@@ -129,6 +154,22 @@ int main() {
         <Text className="text-green-700 font-semibold text-sm">
           {output || "No output"}
         </Text>
+      </View>
+
+      {/* Explanations Section */}
+      <View className="mt-5 p-3 bg-gray-200 rounded-md">
+        <Text className="font-semibold text-black">Explanations:</Text>
+        {explanations.length > 0 ? (
+          explanations.map((line, index) => (
+            <Text key={index} className="text-sm text-gray-700">
+              {line}
+            </Text>
+          ))
+        ) : (
+          <Text className="text-sm text-gray-700">
+            No explanations available.
+          </Text>
+        )}
       </View>
     </View>
   );

@@ -1,20 +1,78 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable prettier/prettier */
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SummaryProgressCard from "@/components/SummaryProgressCard";
-import { icons } from "@/constants";
 import { useGetUser } from "@/hooks/getUser";
 import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
-// import { Link } from "expo-router";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { icons } from "@/constants";
+import { db } from "@/config/FirebaseConfig";
 
 const Home = () => {
   const { userData } = useGetUser();
   const firstName = userData?.name.split(" ")[0];
   const { signOut } = useAuth();
+  const [overallProgress, setOverallProgress] = useState(0);
+
+  useEffect(() => {
+    const calculateOverallProgress = async () => {
+      try {
+        // 1. Get total courses
+        const courseQuery = query(collection(db, "Courses"));
+        const courseSnapshot = await getDocs(courseQuery);
+        const totalCourses = courseSnapshot.size;
+        console.log("Total Courses: ", totalCourses);
+
+        // 2. Get total users
+        const usersQuery = query(collection(db, "Users"));
+        const usersSnapshot = await getDocs(usersQuery);
+        const totalUsers = usersSnapshot.size;
+        console.log("Total Users: ", totalUsers);
+
+        // 3. Get total viewed courses for the current user
+        if (!userData?.clerkId) {
+          console.error("User ID is not available.");
+          setOverallProgress(0);
+          return;
+        }
+
+        const viewedCourseQuery = query(
+          collection(db, "ViewedCourse"),
+          where("userId", "array-contains", userData.clerkId) // Check for the specific userId
+        );
+
+        const viewedCoursesSnapshot = await getDocs(viewedCourseQuery);
+        const totalViewedCourses = viewedCoursesSnapshot.size; // Count of courses viewed by the user
+        console.log("Total Viewed Courses by User: ", totalViewedCourses);
+
+        // 4. Calculate the overall progress
+        const maxPossibleViews = totalCourses; // Maximum possible views if the user viewed all courses
+        if (maxPossibleViews === 0) {
+          console.log("Max possible views is 0, cannot calculate progress.");
+          setOverallProgress(0);
+          return;
+        }
+
+        const progress = (totalViewedCourses / maxPossibleViews) * 100;
+        console.log("Overall Progress: ", progress);
+
+        setOverallProgress(progress); // Set overall progress state
+      } catch (error) {
+        console.error("Error calculating overall progress: ", error);
+      }
+    };
+
+    calculateOverallProgress();
+  }, [userData]);
+
   const handleSignOut = () => {
     signOut();
     router.replace("/(auth)/sign-in");
   };
+
   return (
     <SafeAreaView className="bg-general-500 px-5 h-screen">
       <ScrollView>
@@ -34,10 +92,10 @@ const Home = () => {
             Learn C Language
           </Text>
           <SummaryProgressCard
-            title="PREPARE BY TOPICS"
+            title={`Prepare by Topics`}
             description="C"
             buttonLabel="Continue Preparation"
-            progress={35}
+            progress={overallProgress}
           />
         </View>
       </ScrollView>

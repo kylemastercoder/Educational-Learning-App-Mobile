@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { useGetUser } from "@/hooks/getUser";
 
 interface Question {
-  answers: string; // This can be an array of strings if you want to store multiple answers separately
+  answers: string[]; // Adjusted to be an array of strings for multiple answers
   correctAnswer: string;
   question: string;
 }
@@ -18,7 +18,7 @@ interface Quizzes {
   howManyQuiz: string;
   type: string;
   thumbnail: string;
-  questions: Question[]; // Change this line to reflect that questions is an array of Question
+  questions: Question[];
 }
 
 const QuizList = () => {
@@ -28,15 +28,18 @@ const QuizList = () => {
 
   React.useEffect(() => {
     const fetchQuizzes = async () => {
+      if (!userData?.clerkId) {
+        return;
+      }
+
       try {
         // Fetch user's quiz scores
         const scoreQuery = query(
           collection(db, "QuizScore"),
-          where("userId", "==", userData?.clerkId)
+          where("userId", "==", userData.clerkId)
         );
         const scoreSnapshot = await getDocs(scoreQuery);
 
-        // Create a set of quiz IDs that the user has attempted
         const attemptedQuizIds = new Set(
           scoreSnapshot.docs.map((doc) => doc.data().quizId)
         );
@@ -50,7 +53,7 @@ const QuizList = () => {
             quizSnapshot.docs.map(async (doc) => {
               const quizData = doc.data();
               const questions = quizData.questions.map((question: any) => ({
-                answers: question.answers.split(", "), // Convert string to array if needed
+                answers: question.answers.split(", "),
                 correctAnswer: question.correctAnswer,
                 question: question.question,
               }));
@@ -67,12 +70,16 @@ const QuizList = () => {
           );
 
           // Filter quizzes to exclude those already attempted by the user
-          const availableQuizzes = quizDocs.filter(
-            (quiz) => !attemptedQuizIds.has(quiz.id)
-          );
+          const availableQuizzes = quizDocs.filter((quiz) => {
+            return !attemptedQuizIds.has(quiz.id);
+          });
 
-          // Set the filtered quizzes
-          setQuizzes(availableQuizzes);
+          // Check if no quizzes are available
+          if (availableQuizzes.length === 0) {
+            setQuizzes([]);
+          } else {
+            setQuizzes(availableQuizzes);
+          }
         }
       } catch (error) {
         console.error("Error fetching quizzes:", error);
@@ -83,52 +90,60 @@ const QuizList = () => {
   }, [userData?.clerkId]);
 
   return (
-    <FlatList
-      data={quizzes}
-      horizontal={true}
-      showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          onPress={() => router.push(`/quizzes/${item.id}`)}
-          style={{
-            backgroundColor: "#fff",
-            marginRight: 10,
-            borderRadius: 10,
-            position: "relative",
-          }}
-        >
-          <Image
-            source={{ uri: item.thumbnail }}
-            style={{
-              width: 210,
-              height: 120,
-              borderTopRightRadius: 10,
-              borderTopLeftRadius: 10,
-            }}
-          />
-          <View className="absolute right-2 top-2 bg-white rounded-md p-1">
-            <Text className="capitalize text-xs">{item.difficulties}</Text>
-          </View>
-          <View style={{ padding: 10 }}>
-            <Text style={{ width: 150, fontSize: 14 }}>
-              {item.type === "multipleChoice"
-                ? "Multiple Choice"
-                : "True or False"}
-            </Text>
-            <Text
+    <>
+      {quizzes.length === 0 ? (
+        <Text>
+          All quizzes have been attempted! Check back later for new quizzes.
+        </Text>
+      ) : (
+        <FlatList
+          data={quizzes}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/quizzes/${item.id}`)}
               style={{
-                marginTop: 3,
-                fontSize: 12,
-                fontWeight: "bold",
-                color: "gray",
+                backgroundColor: "#fff",
+                marginRight: 10,
+                borderRadius: 10,
+                position: "relative",
               }}
             >
-              {item.howManyQuiz} Questions
-            </Text>
-          </View>
-        </TouchableOpacity>
+              <Image
+                source={{ uri: item.thumbnail }}
+                style={{
+                  width: 210,
+                  height: 120,
+                  borderTopRightRadius: 10,
+                  borderTopLeftRadius: 10,
+                }}
+              />
+              <View className="absolute right-2 top-2 bg-white rounded-md p-1">
+                <Text className="capitalize text-xs">{item.difficulties}</Text>
+              </View>
+              <View style={{ padding: 10 }}>
+                <Text style={{ width: 150, fontSize: 14 }}>
+                  {item.type === "multipleChoice"
+                    ? "Multiple Choice"
+                    : "True or False"}
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 3,
+                    fontSize: 12,
+                    fontWeight: "bold",
+                    color: "gray",
+                  }}
+                >
+                  {item.howManyQuiz} Questions
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       )}
-    />
+    </>
   );
 };
 

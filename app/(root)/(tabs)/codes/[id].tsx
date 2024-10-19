@@ -78,11 +78,6 @@ const SpecificCode = () => {
               <ArrowLeft name="arrowleft" size={20} color="#111" />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity className="mr-5">
-              <Text className="text-black">Edit</Text>
-            </TouchableOpacity>
-          ),
         }}
       />
       <ScrollView className="p-5">

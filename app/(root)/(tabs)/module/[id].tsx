@@ -12,9 +12,17 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
 import ArrowLeft from "react-native-vector-icons/AntDesign";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import RenderHTML from "react-native-render-html";
+import { useGetUser } from "@/hooks/getUser";
 
 interface Modules {
   name: string;
@@ -23,6 +31,7 @@ interface Modules {
 }
 
 const CourseChapter = () => {
+  const { userData } = useGetUser();
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [modules, setModules] = useState<Modules[] | []>([]);
@@ -62,13 +71,76 @@ const CourseChapter = () => {
     fetchModules();
   }, [id]);
 
-  const handleNextModule = () => {
+  const handleNextModule = async () => {
     if (currentIndex < modules.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       moduleRef.current?.scrollToIndex({ animated: true, index: nextIndex });
     } else {
-      ToastAndroid.show("This is the last module", ToastAndroid.SHORT);
+      const courseId = id; // Assuming the courseId is the same as the module's courseId
+      const userId = userData?.clerkId; // Using optional chaining to avoid undefined
+
+      if (!userId) {
+        ToastAndroid.show("User ID is not available.", ToastAndroid.SHORT);
+        console.error("User ID is undefined.");
+        return; // Exit the function if userId is not available
+      }
+
+      try {
+        // Check if the userId and courseId combination already exists in ViewedCourse
+        const viewedCourseQuery = query(
+          collection(db, "ViewedCourse"),
+          where("courseId", "==", courseId),
+          where("userId", "array-contains", userId) // Check if userId already exists in the userId array
+        );
+
+        const querySnapshot = await getDocs(viewedCourseQuery);
+
+        if (!querySnapshot.empty) {
+          ToastAndroid.show(
+            "You've already completed this module!",
+            ToastAndroid.SHORT
+          );
+          setTimeout(() => {
+            router.push("/(root)/history");
+          }, 2000);
+          return; // Exit the function if the document already exists
+        }
+
+        // If no document exists, add a new one
+        const viewedCourseRef = collection(db, "ViewedCourse");
+        await addDoc(viewedCourseRef, {
+          courseId: courseId,
+          userId: arrayUnion(userId), // This will add the userId to the array if it doesn't exist
+        });
+
+        ToastAndroid.show(
+          "Congratulations! You've completed this module!",
+          ToastAndroid.SHORT
+        );
+        setTimeout(() => {
+          router.push("/(root)/history");
+        }, 2000);
+        console.log("ViewedCourse document added successfully");
+      } catch (error) {
+        console.error("Error adding document to ViewedCourse: ", error);
+      }
+    }
+  };
+
+  const handlePreviousModule = () => {
+    if (currentIndex > 0) {
+      const previousIndex = currentIndex - 1;
+      setCurrentIndex(previousIndex);
+      moduleRef.current?.scrollToIndex({
+        animated: true,
+        index: previousIndex,
+      });
+    } else {
+      ToastAndroid.show(
+        "You are already at the first module.",
+        ToastAndroid.SHORT
+      );
     }
   };
 
@@ -97,11 +169,6 @@ const CourseChapter = () => {
           headerLeft: () => (
             <TouchableOpacity className="ml-5" onPress={() => router.back()}>
               <ArrowLeft name="arrowleft" size={20} color="#111" />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity className="mr-5">
-              <Text className="text-black">Edit</Text>
             </TouchableOpacity>
           ),
         }}
@@ -159,12 +226,20 @@ const CourseChapter = () => {
         )}
         keyExtractor={(item) => item.moduleNumber}
       />
-      <TouchableOpacity
-        onPress={handleNextModule}
-        className="w-[90%] mx-auto mb-[30px] rounded-md py-3 bg-emerald-600"
-      >
-        <Text className="text-center text-white font-semibold">Next</Text>
-      </TouchableOpacity>
+      <View className="flex-row justify-center items-center w-[90%] mx-auto mb-[30px]">
+        <TouchableOpacity
+          onPress={handlePreviousModule}
+          className="w-[45%] rounded-md mx-2 py-3 bg-gray-500" // Adjust color as needed
+        >
+          <Text className="text-center text-white font-semibold">Previous</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleNextModule}
+          className="w-[45%] rounded-md mx-2 py-3 bg-emerald-600"
+        >
+          <Text className="text-center text-white font-semibold">Next</Text>
+        </TouchableOpacity>
+      </View>
     </>
   );
 };
