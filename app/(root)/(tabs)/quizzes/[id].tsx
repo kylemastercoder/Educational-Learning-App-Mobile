@@ -12,7 +12,14 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import ArrowLeft from "react-native-vector-icons/AntDesign";
 import { useGetUser } from "@/hooks/getUser";
@@ -52,6 +59,7 @@ const SpecificQuiz = () => {
   const [introduction, setIntroduction] = useState(true);
   const [isAnswerSelected, setIsAnswerSelected] = useState(false);
   const [isChoicesDisabled, setIsChoicesDisabled] = useState(false);
+  const { userData: user } = useGetUser();
 
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -96,6 +104,38 @@ const SpecificQuiz = () => {
 
     fetchQuizData();
   }, [id]);
+
+  const trackQuizView = async (userId: string, quizId: string) => {
+    try {
+      const viewedQuizQuery = query(
+        collection(db, "ViewedQuiz"),
+        where("quizId", "==", quizId),
+        where("userId", "array-contains", userId) // Check if userId already exists in the userId array
+      );
+
+      const querySnapshot = await getDocs(viewedQuizQuery);
+
+      if (!querySnapshot.empty) {
+        console.log("User has already viewed this quiz.");
+        return; // Exit the function if the document already exists
+      }
+
+      // If no document exists, add a new one
+      const viewedCourseRef = collection(db, "ViewedQuiz");
+      await addDoc(viewedCourseRef, {
+        quizId: quizId,
+        userId: arrayUnion(userId),
+      });
+    } catch (error) {
+      console.error("Error tracking quiz view:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (quizData && user) {
+      trackQuizView(user.clerkId, id as string);
+    }
+  }, [quizData, user]);
 
   const goToNextQuestion = () => {
     if (currentQuestionIndex < quizData!.questions.length - 1) {

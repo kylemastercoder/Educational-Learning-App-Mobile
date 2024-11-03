@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable prettier/prettier */
 import {
   View,
   Text,
@@ -8,11 +10,21 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import ArrowLeft from "react-native-vector-icons/AntDesign";
 import RenderHTML from "react-native-render-html";
 import CodeRunner from "@/components/CodeRunner";
+import { useGetUser } from "@/hooks/getUser";
 
 interface CodeContent {
   id: string;
@@ -27,6 +39,7 @@ const SpecificCode = () => {
   const [codeData, setCodeData] = useState<CodeContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { userData: user } = useGetUser();
 
   useEffect(() => {
     const fetchCodeData = async () => {
@@ -52,6 +65,38 @@ const SpecificCode = () => {
 
     fetchCodeData();
   }, [id]);
+
+  const trackCodeView = async (userId: string, codeId: string) => {
+    try {
+      const viewedCodeQuery = query(
+        collection(db, "ViewedCode"),
+        where("codeId", "==", codeId),
+        where("userId", "array-contains", userId) // Check if userId already exists in the userId array
+      );
+
+      const querySnapshot = await getDocs(viewedCodeQuery);
+
+      if (!querySnapshot.empty) {
+        console.log("User has already viewed this code challenge.");
+        return; // Exit the function if the document already exists
+      }
+
+      // If no document exists, add a new one
+      const viewedCourseRef = collection(db, "ViewedCode");
+      await addDoc(viewedCourseRef, {
+        codeId: codeId,
+        userId: arrayUnion(userId),
+      });
+    } catch (error) {
+      console.error("Error tracking video view:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (codeData && user) {
+      trackCodeView(user.clerkId, id as string);
+    }
+  }, [codeData, user]);
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;

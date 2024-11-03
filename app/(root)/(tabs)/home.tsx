@@ -34,7 +34,6 @@ const Home = () => {
 
         // 3. Get total viewed courses for the current user
         if (!userData?.clerkId) {
-          console.error("User ID is not available.");
           setOverallProgress(0);
           return;
         }

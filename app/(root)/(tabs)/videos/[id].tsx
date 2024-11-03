@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
 import {
   View,
@@ -10,6 +11,8 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
 import {
+  addDoc,
+  arrayUnion,
   collection,
   doc,
   getDoc,
@@ -23,6 +26,7 @@ import YoutubePlayer from "react-native-youtube-iframe";
 import Video, { VideoRef } from "react-native-video";
 import RenderHTML from "react-native-render-html";
 import { extractVideoId } from "@/lib/utils";
+import { useGetUser } from "@/hooks/getUser";
 
 interface VideoContent {
   id: string;
@@ -50,6 +54,7 @@ const SpecificVideo = () => {
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const videoRef = useRef<VideoRef>(null);
+  const { userData: user } = useGetUser();
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -108,6 +113,39 @@ const SpecificVideo = () => {
 
     fetchVideoData();
   }, [id]);
+
+  // Track video views
+  const trackVideoView = async (userId: string, videoId: string) => {
+    try {
+      const viewedVideoQuery = query(
+        collection(db, "ViewedVideo"),
+        where("videoId", "==", videoId),
+        where("userId", "array-contains", userId) // Check if userId already exists in the userId array
+      );
+
+      const querySnapshot = await getDocs(viewedVideoQuery);
+
+      if (!querySnapshot.empty) {
+        console.log("Video already viewed by this user.");
+        return; // Exit the function if the document already exists
+      }
+
+      // If no document exists, add a new one
+      const viewedCourseRef = collection(db, "ViewedVideo");
+      await addDoc(viewedCourseRef, {
+        videoId: videoId,
+        userId: arrayUnion(userId), // This will add the userId to the array if it doesn't exist
+      });
+    } catch (error) {
+      console.error("Error tracking video view:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (videoData && user) {
+      trackVideoView(user.clerkId, id as string);
+    }
+  }, [videoData, userData]);
 
   const onStateChange = useCallback((state: string) => {
     if (state === "ended") {

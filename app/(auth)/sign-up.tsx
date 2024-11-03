@@ -24,7 +24,6 @@ const SignUp = () => {
     birthdate: "",
     age: "",
     gender: "",
-    block: "",
     studentNo: "",
     course: "Bachelor of Science in Information Technology",
     username: "",
@@ -107,7 +106,6 @@ const SignUp = () => {
           email: form.email,
           birthdate: form.birthdate,
           age: form.age,
-          block: form.block,
           course: form.course,
           studentNo: form.studentNo,
           username: form.username,
@@ -204,23 +202,6 @@ const SignUp = () => {
               onChangeText={(value) => setForm({ ...form, course: value })}
               isLoading={isLoading}
             />
-          </View>
-          <View className="border border-zinc-300 rounded-md w-[320px] py-0">
-            <Picker
-              selectedValue={form.block}
-              onValueChange={(itemValue, itemIndex) =>
-                setForm({ ...form, block: itemValue })
-              }
-              itemStyle={{ fontSize: 15 }}
-              style={{ padding: 0 }}
-            >
-              <Picker.Item color="gray" label="Select Your Block" value="" />
-              <Picker.Item color="gray" label="A" value="A" />
-              <Picker.Item color="gray" label="B" value="B" />
-              <Picker.Item color="gray" label="C" value="C" />
-              <Picker.Item color="gray" label="D" value="D" />
-              <Picker.Item color="gray" label="E" value="E" />
-            </Picker>
           </View>
           <InputField
             placeholder="Student No. (e.g. ***-***)"
