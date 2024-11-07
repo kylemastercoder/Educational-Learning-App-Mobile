@@ -13,7 +13,7 @@ const History = () => {
         <View className="mt-10">
           <View className="flex-row mb-2 justify-between items-center">
             <Text className="text-zinc-600 font-semibold text-lg">
-              Learning Materials
+              Learning Modules
             </Text>
           </View>
           <CourseList />

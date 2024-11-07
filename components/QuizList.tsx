@@ -110,15 +110,7 @@ const QuizList = () => {
                 position: "relative",
               }}
             >
-              <Image
-                source={{ uri: item.thumbnail }}
-                style={{
-                  width: 210,
-                  height: 120,
-                  borderTopRightRadius: 10,
-                  borderTopLeftRadius: 10,
-                }}
-              />
+              <View className="bg-zinc-200 w-full h-[150px]"></View>
               <View className="absolute right-2 top-2 bg-white rounded-md p-1">
                 <Text className="capitalize text-xs">{item.difficulties}</Text>
               </View>

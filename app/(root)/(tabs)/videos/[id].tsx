@@ -174,7 +174,10 @@ const SpecificVideo = () => {
           headerTitle: "Video Lecture Details",
           headerTintColor: "#111",
           headerLeft: () => (
-            <TouchableOpacity className="ml-5" onPress={() => router.back()}>
+            <TouchableOpacity
+              className="ml-5"
+              onPress={() => router.push("/(root)/history")}
+            >
               <ArrowLeft name="arrowleft" size={20} color="#111" />
             </TouchableOpacity>
           ),

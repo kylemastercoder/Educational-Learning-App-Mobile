@@ -282,7 +282,7 @@ const SpecificQuiz = () => {
               headerLeft: () => (
                 <TouchableOpacity
                   className="ml-5"
-                  onPress={() => router.back()}
+                  onPress={() => router.push("/(root)/history")}
                 >
                   <ArrowLeft name="arrowleft" size={20} color="#111" />
                 </TouchableOpacity>

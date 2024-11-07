@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { collection, getDocs, query } from "firebase/firestore";
@@ -10,6 +10,7 @@ interface CodeContent {
   id: string;
   title: string;
   description: string;
+  thumbnail: string;
 }
 
 const CodeList = () => {
@@ -30,6 +31,7 @@ const CodeList = () => {
                 id: doc.id,
                 title: codeData.title,
                 description: codeData.description,
+                thumbnail: codeData.thumbnail,
               };
             })
           );
@@ -55,24 +57,34 @@ const CodeList = () => {
             backgroundColor: "#fff",
             marginRight: 10,
             borderRadius: 10,
-            padding: 10,
           }}
         >
-          <View>
-            <Text style={{ width: 150, fontSize: 16, fontWeight: "500" }}>
-              {item.title}
-            </Text>
-          </View>
-          <View className="w-60">
-            <RenderHTML
-              contentWidth={50}
-              source={{ html: item?.description || "" }}
-              tagsStyles={{
-                li: { marginTop: 0, marginLeft: 5 },
-                p: { marginTop: 0 },
-                h1: { marginTop: 0 },
-              }}
-            />
+          <Image
+            source={{ uri: item.thumbnail }}
+            style={{
+              width: "100%",
+              height: 120,
+              borderTopRightRadius: 10,
+              borderTopLeftRadius: 10,
+            }}
+          />
+          <View style={{ padding: 10 }}>
+            <View>
+              <Text style={{ width: 150, fontSize: 14, fontWeight: "500" }}>
+                {item.title}
+              </Text>
+            </View>
+            <View className="w-60">
+              <RenderHTML
+                contentWidth={50}
+                source={{ html: item?.description || "" }}
+                tagsStyles={{
+                  li: { marginTop: 0, marginLeft: 5 },
+                  p: { marginTop: 0 },
+                  h1: { marginTop: 0 },
+                }}
+              />
+            </View>
           </View>
         </TouchableOpacity>
       )}

@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
   ScrollView,
+  Image,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
@@ -28,6 +29,7 @@ interface Modules {
   name: string;
   content: string;
   moduleNumber: string;
+  imagesUrl: string[];
 }
 
 const CourseChapter = () => {
@@ -56,6 +58,7 @@ const CourseChapter = () => {
             content: doc.data().content,
             moduleNumber: doc.data().moduleNumber,
             courseId: doc.data().courseId,
+            imagesUrl: doc.data().imagesUrl || [],
           }));
           setModules(modulesData);
         } else {
@@ -167,7 +170,10 @@ const CourseChapter = () => {
           headerTitle: "Module Details",
           headerTintColor: "#111",
           headerLeft: () => (
-            <TouchableOpacity className="ml-5" onPress={() => router.back()}>
+            <TouchableOpacity
+              className="ml-5"
+              onPress={() => router.push("/(root)/history")}
+            >
               <ArrowLeft name="arrowleft" size={20} color="#111" />
             </TouchableOpacity>
           ),
@@ -213,6 +219,13 @@ const CourseChapter = () => {
             }}
           >
             <Text className="font-semibold text-[18px]">{item.name}</Text>
+            {item.imagesUrl?.map((image: string, index: number) => (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                style={{ width: 200, height: 200 }}
+              />
+            ))}
             <RenderHTML
               contentWidth={100}
               source={{ html: item.content }}
