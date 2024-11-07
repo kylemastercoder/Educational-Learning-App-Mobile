@@ -89,6 +89,18 @@ const QuizList = () => {
     fetchQuizzes();
   }, [userData?.clerkId]);
 
+  const generateRandomColor = () => {
+    const colors = [
+      "bg-green-700",
+      "bg-red-700",
+      "bg-blue-700",
+      "bg-pink-700",
+      "bg-yellow-700",
+      "bg-amber-700",
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
   return (
     <>
       {quizzes.length === 0 ? (
@@ -110,7 +122,9 @@ const QuizList = () => {
                 position: "relative",
               }}
             >
-              <View className="bg-zinc-200 w-full h-[150px]"></View>
+              <View
+                className={`w-full ${generateRandomColor()} h-[150px]`}
+              ></View>
               <View className="absolute right-2 top-2 bg-white rounded-md p-1">
                 <Text className="capitalize text-xs">{item.difficulties}</Text>
               </View>
