@@ -19,7 +19,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.kylemastercoder14.educational_webapp"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +41,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a1437cd7-13c3-4f3b-a0b6-65e4c8e2b6ad"
+      }
     }
   }
 }

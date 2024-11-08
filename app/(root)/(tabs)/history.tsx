@@ -12,9 +12,7 @@ const History = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="mt-10">
           <View className="flex-row mb-2 justify-between items-center">
-            <Text className="text-zinc-600 font-semibold text-lg">
-              Learning Modules
-            </Text>
+            <Text className="text-zinc-600 font-semibold text-lg">Modules</Text>
           </View>
           <CourseList />
         </View>

@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  ToastAndroid,
   ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -49,7 +48,6 @@ const SpecificCourse = () => {
   const [userData, setUserData] = useState<User | null>(null);
   const [modules, setModules] = useState<Modules[] | []>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -71,11 +69,10 @@ const SpecificCourse = () => {
         }));
         setUserData(userData[0]); // Use the first user found
       } else {
-        setError("User not found.");
+        console.log("User not found.");
       }
     } catch (err) {
       console.error("Error fetching user data:", err);
-      setError("Failed to fetch user data.");
     }
   };
 
@@ -96,11 +93,10 @@ const SpecificCourse = () => {
         }));
         setModules(modulesData);
       } else {
-        setError("Modules not found.");
+        console.log("Modules not found.");
       }
     } catch (err) {
       console.error("Error fetching modules data:", err);
-      setError("Failed to fetch modules data.");
     }
   };
 
@@ -121,11 +117,10 @@ const SpecificCourse = () => {
             await fetchUserData(courseData.userId);
           }
         } else {
-          setError("Course not found.");
+          console.log("Course not found.");
         }
       } catch (err) {
         console.error("Error fetching course data:", err);
-        setError("Failed to fetch course data.");
       } finally {
         setLoading(false);
       }
@@ -137,10 +132,6 @@ const SpecificCourse = () => {
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
-  if (error) {
-    ToastAndroid.show(error, ToastAndroid.SHORT);
   }
   return (
     <>

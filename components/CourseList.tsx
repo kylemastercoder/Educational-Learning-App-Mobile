@@ -67,7 +67,10 @@ const CourseList = () => {
 
     const fetchCourses = async () => {
       try {
-        const courseQuery = query(collection(db, "Courses"));
+        const courseQuery = query(
+          collection(db, "Courses"),
+          where("isArchive", "==", false) // Filter for non-archived courses
+        );
         const courseSnapshot = await getDocs(courseQuery);
 
         if (!courseSnapshot.empty) {
@@ -82,9 +85,12 @@ const CourseList = () => {
 
               // Determine progress based on viewed courses
               const isViewed = viewedCourseIds.includes(doc.id);
-              const progress = isViewed
-                ? Math.floor((totalModules / totalModules) * 100)
-                : 0; // You can change this logic if you have a specific progress metric
+              const progress =
+                totalModules === 0
+                  ? 0 // If there are no modules, set progress to 0
+                  : isViewed
+                    ? Math.floor((totalModules / totalModules) * 100) // If viewed, set progress to 100%
+                    : 0; // If not viewed, progress is 0%
 
               return {
                 id: doc.id,
@@ -117,15 +123,24 @@ const CourseList = () => {
           onPress={() => router.push(`/course/${item.id}`)}
           style={{ backgroundColor: "#fff", marginRight: 10, borderRadius: 10 }}
         >
-          <Image
-            source={{ uri: item.imageUrl }}
-            style={{
-              width: 210,
-              height: 120,
-              borderTopRightRadius: 10,
-              borderTopLeftRadius: 10,
-            }}
-          />
+          <View className="relative">
+            <View
+              className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 ? "bg-green-500" : "bg-red-500"} z-50`}
+            >
+              <Text className="font-semibold text-[12px] text-white">
+                {item.progress === 100 ? "Completed" : "Not Completed"}
+              </Text>
+            </View>
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={{
+                width: 210,
+                height: 120,
+                borderTopRightRadius: 10,
+                borderTopLeftRadius: 10,
+              }}
+            />
+          </View>
           <View style={{ padding: 10 }}>
             <Text style={{ width: 150, fontSize: 14 }}>{item.name}</Text>
             <Text
@@ -136,7 +151,7 @@ const CourseList = () => {
                 color: "gray",
               }}
             >
-              {item.moduleCount} modules
+              {item.moduleCount} topics
             </Text>
             <View className="w-full h-2 bg-gray-300 rounded-full mt-2">
               <View

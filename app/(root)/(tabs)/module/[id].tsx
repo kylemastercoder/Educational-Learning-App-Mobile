@@ -84,7 +84,6 @@ const CourseChapter = () => {
       const userId = userData?.clerkId; // Using optional chaining to avoid undefined
 
       if (!userId) {
-        ToastAndroid.show("User ID is not available.", ToastAndroid.SHORT);
         console.error("User ID is undefined.");
         return; // Exit the function if userId is not available
       }
@@ -100,10 +99,6 @@ const CourseChapter = () => {
         const querySnapshot = await getDocs(viewedCourseQuery);
 
         if (!querySnapshot.empty) {
-          ToastAndroid.show(
-            "You've already completed this module!",
-            ToastAndroid.SHORT
-          );
           setTimeout(() => {
             router.push("/(root)/history");
           }, 2000);
@@ -223,7 +218,7 @@ const CourseChapter = () => {
               <Image
                 key={index}
                 source={{ uri: image }}
-                style={{ width: 200, height: 200 }}
+                style={{ width: "100%", height: 200 }}
               />
             ))}
             <RenderHTML
@@ -237,7 +232,8 @@ const CourseChapter = () => {
             />
           </ScrollView>
         )}
-        keyExtractor={(item) => item.moduleNumber}
+        keyExtractor={(item, index) => `${item.moduleNumber}-${index}`}
+        initialScrollIndex={currentIndex}
       />
       <View className="flex-row justify-center items-center w-[90%] mx-auto mb-[30px]">
         <TouchableOpacity

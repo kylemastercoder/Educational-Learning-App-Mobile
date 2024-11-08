@@ -23,21 +23,17 @@ int main() {
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [explanations, setExplanations] = useState<string[]>([]); // New state for explanations
+  const [explanations, setExplanations] = useState<string[]>([]);
 
   async function playSound(url: string) {
-    console.log("Loading Sound");
     const { sound } = await Audio.Sound.createAsync({ uri: url });
     setSound(sound);
-
-    console.log("Playing Sound");
     await sound.playAsync();
   }
 
   useEffect(() => {
     return sound
       ? () => {
-          console.log("Unloading Sound");
           sound?.unloadAsync();
         }
       : undefined;
@@ -98,14 +94,10 @@ int main() {
   // Function to fetch explanations from the AI service
   const fetchExplanations = async (code: string) => {
     try {
-      console.log("Fetching explanations for code:", code); // Log the code being sent
-
-      // Call your make_request function with the code as the prompt
       const explanation = await make_request(code);
 
       if (explanation) {
-        // Split the explanation by lines if necessary and set it in the state
-        const lineExplanations = explanation.split("\n"); // Assuming explanations are line-separated
+        const lineExplanations = explanation.split("\n");
         setExplanations(lineExplanations);
       } else {
         setExplanations(["No explanations available."]);
@@ -117,17 +109,14 @@ int main() {
   };
 
   const handleCodeChange = (text: string) => {
-    // Check if the last character is a newline
     if (text.endsWith("\n")) {
-      // Add indentation (four spaces in this case)
-      text += "    "; // or use '\t' for a tab
+      text += "    ";
     }
     setCode(text);
   };
 
   return (
     <View>
-      {/* Code Input */}
       <Text className="text-lg font-semibold mb-3">Write Your Code Here:</Text>
       <TextInput
         className="border border-gray-300 rounded-md p-3 w-full mb-5"
@@ -137,7 +126,6 @@ int main() {
         style={{ minHeight: 200 }}
       />
 
-      {/* Run Button */}
       <TouchableOpacity
         disabled={isLoading}
         className="w-full py-2 rounded-lg bg-general-400"
@@ -149,9 +137,19 @@ int main() {
       </TouchableOpacity>
 
       {/* Output Section */}
-      <View className="mt-5 p-3 bg-general-400/20 rounded-md">
+      <View
+        className={`mt-5 p-3 ${output === correctOutput.trim() ? "bg-general-400/20" : output.includes("Error") ? "bg-red-500/20" : "bg-red-500/20"} rounded-md`}
+      >
         <Text className="font-semibold text-black">Output:</Text>
-        <Text className="text-green-700 font-semibold text-sm">
+        <Text
+          className={`font-semibold text-sm ${
+            output === correctOutput.trim()
+              ? "text-green-700"
+              : output.includes("Error")
+                ? "text-red-500"
+                : "text-red-500"
+          }`}
+        >
           {output || "No output"}
         </Text>
       </View>

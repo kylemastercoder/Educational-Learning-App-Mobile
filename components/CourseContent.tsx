@@ -5,6 +5,18 @@ import { useRouter } from "expo-router";
 
 const CourseContent = ({ modules }: { modules: any }) => {
   const router = useRouter();
+
+  if (modules.length === 0) {
+    return (
+      <View className="mt-3 pb-40">
+        <Text className="font-semibold text-[16px]">Course Content</Text>
+        <Text className="mt-2 text-center text-[18px] font-semibold text-red-500">
+          No modules found.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View className="mt-3 pb-40">
       <Text className="font-semibold text-[16px]">Course Content</Text>

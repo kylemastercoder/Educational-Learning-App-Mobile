@@ -2,7 +2,7 @@
 import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import RenderHTML from "react-native-render-html";
 
@@ -20,7 +20,10 @@ const CodeList = () => {
   React.useEffect(() => {
     const fetchCodes = async () => {
       try {
-        const codeQuery = query(collection(db, "CodeChallenges"));
+        const codeQuery = query(
+          collection(db, "CodeChallenges"),
+          where("isArchive", "==", false)
+        );
         const codeSnapshot = await getDocs(codeQuery);
 
         if (!codeSnapshot.empty) {

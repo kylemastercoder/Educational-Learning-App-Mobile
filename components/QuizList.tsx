@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import React from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
@@ -45,7 +45,10 @@ const QuizList = () => {
         );
 
         // Fetch quizzes
-        const quizQuery = query(collection(db, "Quizzes"));
+        const quizQuery = query(
+          collection(db, "Quizzes"),
+          where("isArchive", "==", false)
+        );
         const quizSnapshot = await getDocs(quizQuery);
 
         if (!quizSnapshot.empty) {
@@ -105,7 +108,8 @@ const QuizList = () => {
     <>
       {quizzes.length === 0 ? (
         <Text>
-          All quizzes have been attempted! Check back later for new quizzes.
+          All quizzes have been attempted or there is no quiz available! Check
+          back later for new quizzes.
         </Text>
       ) : (
         <FlatList

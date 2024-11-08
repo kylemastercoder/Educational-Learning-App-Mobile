@@ -1,0 +1,29 @@
+{
+  "cli": {
+    "version": ">= 12.6.2",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_bWFzdGVyLW11c3RhbmctNy5jbGVyay5hY2NvdW50cy5kZXYk",
+        "DATABASE_URL": "postgresql://educational_webapp_owner:dV8xcQoOkS0M@ep-misty-tooth-a1y65ik9.ap-southeast-1.aws.neon.tech/educational_webapp?sslmode=require",
+        "EXPO_PUBLIC_GEMINI_API_KEY": "AIzaSyCJL5enZCLRBK-bjEU-eLQ1W4PRMx96xek"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

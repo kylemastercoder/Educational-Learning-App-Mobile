@@ -24,7 +24,6 @@ const Home = () => {
         const courseQuery = query(collection(db, "Courses"));
         const courseSnapshot = await getDocs(courseQuery);
         const totalCourses = courseSnapshot.size;
-        console.log("Total Courses: ", totalCourses);
 
         // 2. Get total users
         const usersQuery = query(collection(db, "Users"));
@@ -45,26 +44,30 @@ const Home = () => {
 
         const viewedCoursesSnapshot = await getDocs(viewedCourseQuery);
         const totalViewedCourses = viewedCoursesSnapshot.size; // Count of courses viewed by the user
-        console.log("Total Viewed Courses by User: ", totalViewedCourses);
 
         // 4. Calculate the overall progress
         const maxPossibleViews = totalCourses; // Maximum possible views if the user viewed all courses
         if (maxPossibleViews === 0) {
-          console.log("Max possible views is 0, cannot calculate progress.");
           setOverallProgress(0);
           return;
         }
 
-        const progress = (totalViewedCourses / maxPossibleViews) * 100;
-        console.log("Overall Progress: ", progress);
+        const progress = Math.min(
+          (totalViewedCourses / maxPossibleViews) * 100,
+          100
+        );
 
-        setOverallProgress(progress); // Set overall progress state
+        setOverallProgress(progress);
       } catch (error) {
         console.error("Error calculating overall progress: ", error);
       }
     };
 
     calculateOverallProgress();
+  }, [userData]);
+
+  useEffect(() => {
+    console.log("User:", userData);
   }, [userData]);
 
   const handleSignOut = () => {

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import { useRouter } from "expo-router";
 
@@ -21,7 +21,10 @@ const VideoList = () => {
   React.useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const videoQuery = query(collection(db, "Videos"));
+        const videoQuery = query(
+          collection(db, "Videos"),
+          where("isArchive", "==", false)
+        );
         const videoSnapshot = await getDocs(videoQuery);
 
         if (!videoSnapshot.empty) {

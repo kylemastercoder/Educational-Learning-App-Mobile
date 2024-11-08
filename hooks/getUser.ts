@@ -13,10 +13,12 @@ export const useGetUser = () => {
     const fetchUserData = async () => {
       if (!user) {
         setLoading(false);
+        setUserData(null); // Explicitly set null if no user
         return;
       }
 
       const email = user.primaryEmailAddress?.emailAddress || "";
+      console.log(email);
 
       try {
         const q = query(collection(db, "Users"), where("email", "==", email));
