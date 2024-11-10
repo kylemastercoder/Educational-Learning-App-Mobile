@@ -91,7 +91,11 @@ const SpecificCourse = () => {
           moduleNumber: doc.data().moduleNumber,
           courseId: doc.data().courseId,
         }));
-        setModules(modulesData);
+
+        const sortedModules = modulesData.sort((a, b) => {
+          return parseInt(a.moduleNumber) - parseInt(b.moduleNumber);
+        });
+        setModules(sortedModules);
       } else {
         console.log("Modules not found.");
       }
