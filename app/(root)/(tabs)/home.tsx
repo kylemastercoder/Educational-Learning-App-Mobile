@@ -57,7 +57,7 @@ const Home = () => {
           100
         );
 
-        setOverallProgress(progress);
+        setOverallProgress(parseFloat(progress.toFixed(2)));
       } catch (error) {
         console.error("Error calculating overall progress: ", error);
       }

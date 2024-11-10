@@ -69,7 +69,7 @@ const CourseList = () => {
       try {
         const courseQuery = query(
           collection(db, "Courses"),
-          where("isArchive", "==", false) // Filter for non-archived courses
+          where("isArchive", "==", false)
         );
         const courseSnapshot = await getDocs(courseQuery);
 
@@ -102,8 +102,15 @@ const CourseList = () => {
             })
           );
 
+          const sortedCourses = courseDocs.sort((a, b) => {
+            const aNum = parseInt(a.name.match(/^\D*(\d+)/)?.[1] || "0", 10);
+            const bNum = parseInt(b.name.match(/^\D*(\d+)/)?.[1] || "0", 10);
+
+            return aNum - bNum;
+          });
+
           // Set all courses at once
-          setCourses(courseDocs);
+          setCourses(sortedCourses);
         }
       } catch (error) {
         console.error("Error fetching courses:", error);

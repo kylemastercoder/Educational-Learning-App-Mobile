@@ -14,6 +14,7 @@ interface Question {
 
 interface Quizzes {
   id: string;
+  quizTitle: string;
   difficulties: string;
   howManyQuiz: string;
   type: string;
@@ -64,6 +65,7 @@ const QuizList = () => {
               return {
                 id: doc.id,
                 difficulties: quizData.difficulties,
+                quizTitle: quizData.quizTitle,
                 howManyQuiz: quizData.howManyQuiz,
                 thumbnail: quizData.thumbnail,
                 type: quizData.type,
@@ -133,6 +135,9 @@ const QuizList = () => {
                 <Text className="capitalize text-xs">{item.difficulties}</Text>
               </View>
               <View style={{ padding: 10 }}>
+                <Text style={{ width: 150, fontSize: 16, fontWeight: "bold" }}>
+                  {item.quizTitle}
+                </Text>
                 <Text style={{ width: 150, fontSize: 14 }}>
                   {item.type === "multipleChoice"
                     ? "Multiple Choice"
