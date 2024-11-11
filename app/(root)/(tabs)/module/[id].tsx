@@ -213,7 +213,6 @@ const CourseChapter = () => {
               padding: 10,
             }}
           >
-            <Text className="font-semibold text-[18px]">{item.name}</Text>
             {item.imagesUrl?.map((image: string, index: number) => (
               <Image
                 key={index}
