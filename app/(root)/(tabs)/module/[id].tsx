@@ -18,6 +18,7 @@ import {
   arrayUnion,
   collection,
   getDocs,
+  orderBy,
   query,
   where,
 } from "firebase/firestore";
@@ -48,7 +49,8 @@ const CourseChapter = () => {
       try {
         const modulesQuery = query(
           collection(db, "Modules"),
-          where("courseId", "==", id)
+          where("courseId", "==", id),
+          orderBy("moduleNumber", "asc")
         );
         const modulesSnapshot = await getDocs(modulesQuery);
 
@@ -136,7 +138,7 @@ const CourseChapter = () => {
       });
     } else {
       ToastAndroid.show(
-        "You are already at the first module.",
+        "You are already at the first topic.",
         ToastAndroid.SHORT
       );
     }
@@ -162,7 +164,7 @@ const CourseChapter = () => {
       />
       <Stack.Screen
         options={{
-          headerTitle: "Module Details",
+          headerTitle: "Topic Details",
           headerTintColor: "#111",
           headerLeft: () => (
             <TouchableOpacity

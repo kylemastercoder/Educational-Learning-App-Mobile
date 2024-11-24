@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
 import {
@@ -147,7 +148,7 @@ const SpecificCourse = () => {
       />
       <Stack.Screen
         options={{
-          headerTitle: "Course Details",
+          headerTitle: "Module Details",
           headerTintColor: "#111",
           headerLeft: () => (
             <TouchableOpacity
@@ -167,7 +168,7 @@ const SpecificCourse = () => {
           alt="Course Image"
           style={{ height: 150, marginTop: 10, borderRadius: 10 }}
         />
-        <Text className="font-semibold text-[16px] mt-3">About Course</Text>
+        <Text className="font-semibold text-[16px] mt-3">About Module</Text>
         <Text numberOfLines={4} className="text-[13px]">
           {courseData?.description}
         </Text>

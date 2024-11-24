@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import React from "react";
 import Play from "react-native-vector-icons/AntDesign";
@@ -9,7 +10,7 @@ const CourseContent = ({ modules }: { modules: any }) => {
   if (modules.length === 0) {
     return (
       <View className="mt-3 pb-40">
-        <Text className="font-semibold text-[16px]">Course Content</Text>
+        <Text className="font-semibold text-[16px]">Module Content</Text>
         <Text className="mt-2 text-center text-[18px] font-semibold text-red-500">
           No modules found.
         </Text>
@@ -19,7 +20,7 @@ const CourseContent = ({ modules }: { modules: any }) => {
 
   return (
     <View className="mt-3 pb-40">
-      <Text className="font-semibold text-[16px]">Course Content</Text>
+      <Text className="font-semibold text-[16px]">Module Content</Text>
       <FlatList
         className="mt-2"
         data={modules}
