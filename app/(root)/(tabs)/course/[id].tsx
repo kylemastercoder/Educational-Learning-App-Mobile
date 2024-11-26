@@ -35,6 +35,11 @@ interface Modules {
   moduleNumber: string;
 }
 
+interface Quiz {
+  id: string;
+  quizTitle: string;
+}
+
 interface User {
   id: string;
   clerkId: string;
@@ -48,6 +53,7 @@ const SpecificCourse = () => {
   const [courseData, setCourseData] = useState<Course | null>(null);
   const [userData, setUserData] = useState<User | null>(null);
   const [modules, setModules] = useState<Modules[] | []>([]);
+  const [quiz, setQuiz] = useState<Quiz[] | []>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
@@ -105,6 +111,29 @@ const SpecificCourse = () => {
     }
   };
 
+  const fetchQuizByCourse = async () => {
+    try {
+      const quizQuery = query(
+        collection(db, "Quizzes"),
+        where("courseId", "==", id)
+      );
+      const quizSnapshot = await getDocs(quizQuery);
+
+      if (!quizSnapshot.empty) {
+        const quizData = quizSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          quizTitle: doc.data().quizTitle,
+        }));
+
+        setQuiz(quizData);
+      } else {
+        console.log("Quiz not found.");
+      }
+    } catch (err) {
+      console.error("Error fetching quiz data:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchCourseData = async () => {
       if (!id) return;
@@ -133,6 +162,7 @@ const SpecificCourse = () => {
 
     fetchCourseData();
     fetchModules();
+    fetchQuizByCourse();
   }, [id]);
 
   if (loading) {
@@ -172,7 +202,10 @@ const SpecificCourse = () => {
         <Text numberOfLines={4} className="text-[13px]">
           {courseData?.description}
         </Text>
-        <CourseContent modules={modules} />
+        <CourseContent
+          quiz={quiz.length > 0 ? quiz[0] : null}
+          modules={modules}
+        />
       </ScrollView>
     </>
   );

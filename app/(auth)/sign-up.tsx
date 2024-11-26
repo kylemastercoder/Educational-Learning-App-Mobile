@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
@@ -27,6 +28,7 @@ const SignUp = () => {
     studentNo: "",
     course: "Bachelor of Science in Information Technology",
     username: "",
+    status: "Pending",
   });
 
   const [verification, setVerification] = useState({

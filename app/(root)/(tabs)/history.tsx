@@ -3,7 +3,6 @@ import { View, Text, SafeAreaView, ScrollView } from "react-native";
 import React from "react";
 import CourseList from "@/components/CourseList";
 import VideoList from "@/components/VideoList";
-import QuizList from "@/components/QuizList";
 import CodeList from "@/components/CodeList";
 
 const History = () => {
@@ -23,12 +22,6 @@ const History = () => {
             </Text>
           </View>
           <VideoList />
-        </View>
-        <View className="mt-5">
-          <View className="flex-row mb-2 justify-between items-center">
-            <Text className="text-zinc-600 font-semibold text-lg">Quizzes</Text>
-          </View>
-          <QuizList />
         </View>
         <View className="mt-5">
           <View className="flex-row mb-2 justify-between items-center">

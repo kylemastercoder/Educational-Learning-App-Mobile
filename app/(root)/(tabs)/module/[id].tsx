@@ -9,9 +9,16 @@ import {
   Dimensions,
   ScrollView,
   Image,
+  Linking,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Stack, Tabs, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Href,
+  Stack,
+  Tabs,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import ArrowLeft from "react-native-vector-icons/AntDesign";
 import {
   addDoc,
@@ -102,7 +109,7 @@ const CourseChapter = () => {
 
         if (!querySnapshot.empty) {
           setTimeout(() => {
-            router.push("/(root)/history");
+            reloadApp("/(root)/history");
           }, 2000);
           return; // Exit the function if the document already exists
         }
@@ -119,13 +126,21 @@ const CourseChapter = () => {
           ToastAndroid.SHORT
         );
         setTimeout(() => {
-          router.push("/(root)/history");
+          reloadApp("/(root)/history");
         }, 2000);
         console.log("ViewedCourse document added successfully");
       } catch (error) {
         console.error("Error adding document to ViewedCourse: ", error);
       }
     }
+  };
+
+  const reloadApp = (url: string) => {
+    router.replace(url as Href);
+    setTimeout(() => {
+      // Force reload using the native Linking API
+      Linking.openURL(url);
+    }, 500); // Adjust delay if necessary for smooth redirection
   };
 
   const handlePreviousModule = () => {
