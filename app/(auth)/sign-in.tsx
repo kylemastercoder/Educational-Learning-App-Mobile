@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
 import OAuth from "@/components/OAuth";

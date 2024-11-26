@@ -1,8 +1,16 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  ToastAndroid,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SummaryProgressCard from "@/components/SummaryProgressCard";
 import { useGetUser } from "@/hooks/getUser";
@@ -16,6 +24,15 @@ const Home = () => {
   const firstName = userData?.name.split(" ")[0];
   const { signOut } = useAuth();
   const [overallProgress, setOverallProgress] = useState(0);
+
+  if (userData?.status === "Rejected") {
+    ToastAndroid.show(
+      "Your account has been rejected. Please contact support.",
+      ToastAndroid.LONG
+    );
+    signOut();
+    router.replace("/(auth)/sign-in");
+  }
 
   useEffect(() => {
     const calculateOverallProgress = async () => {
