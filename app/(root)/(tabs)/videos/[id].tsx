@@ -186,7 +186,7 @@ const SpecificVideo = () => {
       <ScrollView className="p-5">
         <View className="pb-20">
           <Text className="text-[16px] font-semibold">{videoData?.name}</Text>
-          <Text className="text-zinc-700 mb-3">By {userData?.username}</Text>
+          <Text className="text-zinc-700 mb-3">By Admin</Text>
           {videoData?.method === "youtube" ? (
             <YoutubePlayer
               height={185}

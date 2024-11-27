@@ -192,7 +192,7 @@ const SpecificCourse = () => {
       />
       <ScrollView className="p-5">
         <Text className="font-bold text-[17px]">{courseData?.name}</Text>
-        <Text className="text-zinc-700">By {userData?.username}</Text>
+        <Text className="text-zinc-700">By Admin</Text>
         <Image
           source={{ uri: courseData?.imageUrl }}
           alt="Course Image"
