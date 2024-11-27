@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
 
