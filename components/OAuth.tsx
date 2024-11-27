@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useOAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { Alert, Image, Text, View } from "react-native";
