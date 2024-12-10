@@ -10,39 +10,35 @@ import { db } from "@/config/FirebaseConfig";
 const CourseContent = ({ modules, quiz }: { modules: any; quiz: any }) => {
   const { userData } = useGetUser(); // Get user data
   const router = useRouter();
-  const [allModulesCompleted, setAllModulesCompleted] = useState(false); // State to track module completion
+  const [viewedModules, setViewedModules] = useState<string[]>([]);
 
   useEffect(() => {
-    const checkModulesCompletion = async () => {
+    const fetchViewedModules = async () => {
       if (!userData?.clerkId || modules.length === 0) return;
 
       try {
-        const completedQuery = query(
+        const moduleQuery = query(
           collection(db, "ViewedCourse"),
           where("userId", "array-contains", userData.clerkId),
           where("courseId", "==", modules[0].courseId)
         );
-        const completedSnapshot = await getDocs(completedQuery);
+        const snapshot = await getDocs(moduleQuery);
 
-        const completedModuleIds = completedSnapshot.docs.map(
-          (doc) => doc.data().moduleId
-        );
-
-        // Check if all module IDs are in the completed list
-        const allCompleted = modules.every((module: any) =>
-          completedModuleIds.includes(module.id)
-        );
-
-        setAllModulesCompleted(allCompleted);
-        console.log("All modules completed:", allCompleted);
+        const viewedModuleIds = snapshot.docs.map((doc) => doc.data().moduleId);
+        setViewedModules(viewedModuleIds); // Update the viewed modules
       } catch (error) {
-        console.error("Error checking module completion:", error);
-        setAllModulesCompleted(false);
+        console.error("Error fetching viewed modules:", error);
+        setViewedModules([]);
       }
     };
 
-    checkModulesCompletion();
+    fetchViewedModules();
   }, [modules, userData]);
+
+  const isModuleAccessible = (index: number) => {
+    if (index === 0) return true;
+    return viewedModules.includes(modules[index - 1]?.id);
+  };
 
   return (
     <View className="mt-3 pb-40">
@@ -67,42 +63,23 @@ const CourseContent = ({ modules, quiz }: { modules: any; quiz: any }) => {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => router.push(`/module/${item.courseId}`)}
+                onPress={
+                  isModuleAccessible(index)
+                    ? () => router.push(`/module/${item.courseId}`)
+                    : undefined
+                }
+                disabled={!isModuleAccessible(index)}
               >
-                <Play name="play" size={20} color="green" />
+                <Play
+                  name="play"
+                  size={20}
+                  color={isModuleAccessible(index) ? "green" : "gray"}
+                />
               </TouchableOpacity>
             </View>
           )}
           keyExtractor={(item, index) => index.toString()}
         />
-      )}
-
-      {/* Render Quiz Section */}
-      {quiz && quiz.quizTitle && (
-        <View className="flex-row justify-between bg-white items-center rounded-lg p-5">
-          <View className="flex-row items-center">
-            <Text className="font-bold text-[15px] text-zinc-600 mr-3">
-              Quiz:
-            </Text>
-            <Text className="font-semibold text-[15px] w-[180px]">
-              {quiz.quizTitle}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={
-              allModulesCompleted
-                ? () => router.push(`/quizzes/${quiz.id}`)
-                : undefined
-            }
-            disabled={!allModulesCompleted}
-          >
-            <Play
-              name="play"
-              size={20}
-              color={allModulesCompleted ? "blue" : "gray"}
-            />
-          </TouchableOpacity>
-        </View>
       )}
     </View>
   );

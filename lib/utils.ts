@@ -1,4 +1,8 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable prettier/prettier */
+import { Href, useRouter } from "expo-router";
+
 export const calculateAge = (birthdate: string) => {
   const [day, month, year] = birthdate.split("/").map(Number);
   if (!day || !month || !year) return "";
@@ -42,3 +46,8 @@ export function calculatePercentage(
 
   return percentage;
 }
+
+export const reloadApp = (path: string) => {
+  const router = useRouter();
+  router.replace(path as Href);
+};

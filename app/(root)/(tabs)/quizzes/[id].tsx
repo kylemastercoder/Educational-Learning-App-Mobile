@@ -28,6 +28,7 @@ import LottieView from "lottie-react-native";
 import { animations } from "@/constants";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
+import * as Updates from "expo-updates";
 
 interface Question {
   answers: string[]; // Change this to an array of strings
@@ -40,6 +41,7 @@ interface Quizzes {
   difficulties: string;
   userId: string;
   howManyQuiz: string;
+  instruction: string;
   type: string;
   thumbnail: string;
   questions: Question[]; // Change this line to reflect that questions is an array of Question
@@ -89,6 +91,7 @@ const SpecificQuiz = () => {
                 thumbnail: quizData.thumbnail,
                 userId: quizData.userId,
                 type: quizData.type,
+                instruction: quizData.instruction,
                 questions: questions,
               } as Quizzes;
             })
@@ -111,14 +114,14 @@ const SpecificQuiz = () => {
       const viewedQuizQuery = query(
         collection(db, "ViewedQuiz"),
         where("quizId", "==", quizId),
-        where("userId", "array-contains", userId) // Check if userId already exists in the userId array
+        where("userId", "array-contains", userId)
       );
 
       const querySnapshot = await getDocs(viewedQuizQuery);
 
       if (!querySnapshot.empty) {
         console.log("User has already viewed this quiz.");
-        return; // Exit the function if the document already exists
+        return;
       }
 
       // If no document exists, add a new one
@@ -252,12 +255,7 @@ const SpecificQuiz = () => {
             <Text className="text-center text-lg font-semibold">
               Welcome to the C Programming Quiz!
             </Text>
-            <Text className="text-center">
-              We’re excited to have you here! This quiz is designed to challenge
-              your knowledge and skills in C programming. You have four choices
-              to select from, and you have 60 seconds to answer each question.
-              Good luck!
-            </Text>
+            <Text className="text-center">{quizData?.instruction}</Text>
             <TouchableOpacity
               className="bg-emerald-800 rounded-lg mt-5 py-2 w-full"
               onPress={() => setIntroduction(false)}
@@ -339,36 +337,82 @@ const SpecificQuiz = () => {
                       </Text>
                     </View>
                     <View className="w-full mt-3">
-                      {quizData.questions[currentQuestionIndex].answers.map(
-                        (answer, index) => {
-                          return (
-                            <TouchableOpacity
-                              key={index}
-                              onPress={() =>
-                                handleAnswerSelect(
-                                  currentQuestionIndex,
-                                  answer,
-                                  quizData.questions[currentQuestionIndex]
-                                    .correctAnswer
-                                )
-                              }
-                              disabled={isChoicesDisabled}
-                              className={`bg-white rounded-lg my-2 p-2 border-2 border-gray-300 ${
-                                isAnswerSelected
-                                  ? answer ===
+                      {quizData.type === "multipleChoice" ? (
+                        // Render multiple choice answers dynamically
+                        quizData.questions[currentQuestionIndex].answers.map(
+                          (answer, index) => {
+                            const isAnswerCorrect =
+                              answer ===
+                              quizData.questions[currentQuestionIndex]
+                                .correctAnswer;
+
+                            return (
+                              <TouchableOpacity
+                                key={index}
+                                onPress={() =>
+                                  handleAnswerSelect(
+                                    currentQuestionIndex,
+                                    answer,
                                     quizData.questions[currentQuestionIndex]
                                       .correctAnswer
-                                    ? "border-green-500"
-                                    : "border-red-500"
-                                  : ""
-                              }`}
-                            >
-                              <Text className="text-center text-[14px]">
-                                {answer}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        }
+                                  )
+                                }
+                                disabled={isChoicesDisabled}
+                                className={`bg-white rounded-lg my-2 p-2 border-2 border-gray-300 ${
+                                  isAnswerSelected
+                                    ? isAnswerCorrect
+                                      ? "border-green-500"
+                                      : "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <Text className="text-center text-[14px]">
+                                  {answer}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          }
+                        )
+                      ) : quizData.type === "trueFalse" ? (
+                        // Render True/False buttons dynamically
+                        <>
+                          {["True", "False"].map((label) => {
+                            const value = label === "True"; // Set value to true for "True" and false for "False"
+
+                            return (
+                              <TouchableOpacity
+                                key={label}
+                                onPress={() =>
+                                  handleAnswerSelect(
+                                    currentQuestionIndex,
+                                    value.toString(),
+                                    quizData.questions[currentQuestionIndex]
+                                      .correctAnswer
+                                  )
+                                }
+                                disabled={isChoicesDisabled}
+                                className={`bg-white rounded-lg my-2 p-2 border-2 border-gray-300 ${
+                                  isAnswerSelected
+                                    ? value.toString() ===
+                                      quizData.questions[currentQuestionIndex]
+                                        .correctAnswer
+                                      ? "border-green-500"
+                                      : "border-red-500"
+                                    : ""
+                                }`}
+                              >
+                                <Text className="text-center text-[14px]">
+                                  {label}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </>
+                      ) : (
+                        // Render for other types (if any)
+                        <Text className="text-center text-[14px]">
+                          This question type is not supported.
+                        </Text>
                       )}
                     </View>
                   </View>
@@ -395,7 +439,10 @@ const SpecificQuiz = () => {
             <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
-                router.back(); // Navigate back after closing the modal
+                router.back();
+                setTimeout(async () => {
+                  await Updates.reloadAsync();
+                }, 1000);
               }}
               className="bg-emerald-800 py-2 w-full rounded-lg mt-3"
             >

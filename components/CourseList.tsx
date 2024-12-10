@@ -1,7 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/config/FirebaseConfig";
 import { useRouter } from "expo-router";
 import { useGetUser } from "@/hooks/getUser"; // Assuming this hook fetches the user data
@@ -11,7 +18,9 @@ interface Course {
   name: string;
   imageUrl: string;
   moduleCount: number;
-  progress: number; // Added progress field
+  progress: number;
+  quiz: any;
+  quizTaken: boolean;
 }
 
 const CourseList = () => {
@@ -20,6 +29,42 @@ const CourseList = () => {
   const [courses, setCourses] = React.useState<Course[]>([]);
 
   React.useEffect(() => {
+    const getQuizByCourseId = async (courseId: string) => {
+      try {
+        const q = query(
+          collection(db, "Quizzes"),
+          where("courseId", "==", courseId)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          return querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        }
+
+        const getQuizById = async (quizId: string) => {
+          try {
+            const quizDoc = await getDoc(doc(db, "Quizzes", quizId));
+            if (quizDoc.exists()) {
+              return { id: quizDoc.id, ...quizDoc.data() };
+            }
+            return null;
+          } catch (error) {
+            console.error("Error fetching quiz:", error);
+            return null;
+          }
+        };
+
+        getQuizById(querySnapshot.docs[0].id);
+        return null;
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        return null;
+      }
+    };
+
     const getModules = async (courseId: string) => {
       try {
         const q = query(
@@ -52,7 +97,7 @@ const CourseList = () => {
       try {
         const viewedQuery = query(
           collection(db, "ViewedCourse"),
-          where("userId", "array-contains", userData.clerkId) // Fetch viewed courses for the user
+          where("userId", "array-contains", userData.clerkId)
         );
         const viewedSnapshot = await getDocs(viewedQuery);
         const viewedCourseIds = viewedSnapshot.docs.map(
@@ -62,6 +107,23 @@ const CourseList = () => {
       } catch (error) {
         console.error("Error fetching viewed courses:", error);
         return [];
+      }
+    };
+
+    const getViewedQuiz = async (quizId: string) => {
+      if (!userData?.clerkId) return false;
+
+      try {
+        const viewedQuizQuery = query(
+          collection(db, "QuizScore"),
+          where("quizId", "==", quizId),
+          where("userId", "==", userData.clerkId) // Fetch quiz taken by the user
+        );
+        const viewedQuizSnapshot = await getDocs(viewedQuizQuery);
+        return !viewedQuizSnapshot.empty; // If empty, quiz hasn't been taken
+      } catch (error) {
+        console.error("Error fetching viewed quiz:", error);
+        return false;
       }
     };
 
@@ -76,11 +138,12 @@ const CourseList = () => {
         if (!courseSnapshot.empty) {
           const viewedCourseIds = await getViewedCourses(); // Fetch viewed courses IDs
 
-          // Use `Promise.all` to handle multiple async calls to `getModules`
+          // Use `Promise.all` to handle multiple async calls to `getModules`, `getQuizByCourseId`, and `getViewedQuiz`
           const courseDocs = await Promise.all(
             courseSnapshot.docs.map(async (doc) => {
               const courseData = doc.data();
               const modulesResponse = await getModules(doc.id);
+              const quizResponse = await getQuizByCourseId(doc.id);
               const totalModules = modulesResponse.modules.length || 0;
 
               // Determine progress based on viewed courses
@@ -92,12 +155,20 @@ const CourseList = () => {
                     ? Math.floor((totalModules / totalModules) * 100) // If viewed, set progress to 100%
                     : 0; // If not viewed, progress is 0%
 
+              // Get quiz status for the course
+              const quizTaken =
+                quizResponse && quizResponse.length > 0
+                  ? await getViewedQuiz(quizResponse[0].id)
+                  : false;
+
               return {
                 id: doc.id,
                 name: courseData.name,
                 imageUrl: courseData.imageUrl,
                 moduleCount: totalModules,
                 progress: progress,
+                quiz: quizResponse, // Add quiz data to the course object
+                quizTaken: quizTaken, // Store quiz taken status
               };
             })
           );
@@ -118,7 +189,7 @@ const CourseList = () => {
     };
 
     fetchCourses();
-  }, [userData]); // Added userData as a dependency to re-fetch courses when user data changes
+  }, [userData]);
 
   return (
     <FlatList
@@ -132,10 +203,12 @@ const CourseList = () => {
         >
           <View className="relative">
             <View
-              className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 ? "bg-green-500" : "bg-red-500"} z-50`}
+              className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 && item.quizTaken ? "bg-green-500" : "bg-red-500"} z-50`}
             >
               <Text className="font-semibold text-[12px] text-white">
-                {item.progress === 100 ? "Completed" : "Not Completed"}
+                {item.progress === 100 && item.quizTaken
+                  ? "Completed"
+                  : "Not Completed"}
               </Text>
             </View>
             <Image
@@ -149,7 +222,13 @@ const CourseList = () => {
             />
           </View>
           <View style={{ padding: 10 }}>
-            <Text style={{ width: 150, fontSize: 14 }}>{item.name}</Text>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ width: 150, fontSize: 14 }}
+            >
+              {item.name}
+            </Text>
             <Text
               style={{
                 marginTop: 3,
@@ -167,6 +246,34 @@ const CourseList = () => {
               />
             </View>
             <Text className="self-start text-xs mt-1">{item.progress}%</Text>
+            <TouchableOpacity
+              onPress={() =>
+                item.progress === 100 &&
+                item.quiz &&
+                !item.quizTaken &&
+                router.push(`/quizzes/${item.quiz[0].id}`)
+              }
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  backgroundColor:
+                    item.quizTaken || item.progress !== 100 || !item.quiz
+                      ? "#777"
+                      : "#22c55e", // Disabled color if quiz is taken or course is not completed
+                  padding: 5,
+                  borderRadius: 5,
+                  textAlign: "center",
+                  marginTop: 5,
+                }}
+              >
+                {item.quizTaken
+                  ? "Quiz Taken"
+                  : item.progress === 100 || item.quiz
+                    ? "Take Assessment"
+                    : "No Quiz Available"}
+              </Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}

@@ -32,6 +32,7 @@ import {
 import { db } from "@/config/FirebaseConfig";
 import RenderHTML from "react-native-render-html";
 import { useGetUser } from "@/hooks/getUser";
+import * as Updates from "expo-updates";
 
 interface Modules {
   name: string;
@@ -111,7 +112,7 @@ const CourseChapter = () => {
           setTimeout(() => {
             reloadApp("/(root)/history");
           }, 2000);
-          return; // Exit the function if the document already exists
+          return;
         }
 
         // If no document exists, add a new one
@@ -125,8 +126,8 @@ const CourseChapter = () => {
           "Congratulations! You've completed this module!",
           ToastAndroid.SHORT
         );
-        setTimeout(() => {
-          reloadApp("/(root)/history");
+        setTimeout(async () => {
+          await Updates.reloadAsync();
         }, 2000);
         console.log("ViewedCourse document added successfully");
       } catch (error) {
