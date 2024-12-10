@@ -10,6 +10,7 @@ import {
   View,
   Image,
   ToastAndroid,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SummaryProgressCard from "@/components/SummaryProgressCard";
@@ -20,6 +21,7 @@ import { icons } from "@/constants";
 import { db } from "@/config/FirebaseConfig";
 
 const Home = () => {
+  const [open, setOpen] = useState(false);
   const { userData } = useGetUser();
   const firstName = userData?.name.split(" ")[0];
   const { signOut } = useAuth();
@@ -93,32 +95,62 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView className="bg-general-500 px-5 h-screen">
-      <ScrollView>
-        <View className="flex flex-row items-center justify-between my-5">
-          <Text className="text-2xl font-JakartaExtraBold">
-            Welcome, {firstName} 👋
-          </Text>
-          <TouchableOpacity
-            onPress={handleSignOut}
-            className="justify-center items-center w-10 h-10 rounded-full bg-white"
-          >
-            <Image source={icons.out} className="w-4 h-4" />
-          </TouchableOpacity>
+    <>
+      <Modal
+        visible={open}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/80">
+          <View className="bg-white rounded-lg p-5 w-4/5">
+            <Text className="font-semibold text-md">
+              Are you sure you want to logout?
+            </Text>
+            <View className="flex items-center gap-2 flex-row mt-2 justify-end">
+              <TouchableOpacity
+                className="bg-zinc-600 px-2 py-1 rounded-md"
+                onPress={() => setOpen(false)}
+              >
+                <Text className="text-white text-center">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-green-600 px-2 py-1 rounded-md"
+                onPress={handleSignOut}
+              >
+                <Text className="text-white text-center">Yes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <View className="space-y-3">
-          <Text className="text-center text-xl font-JakartaExtraBold mb-3">
-            Learn C Language
-          </Text>
-          <SummaryProgressCard
-            title={`Prepare by Topics`}
-            description="C"
-            buttonLabel="Continue Preparation"
-            progress={overallProgress}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      </Modal>
+      <SafeAreaView className="bg-general-500 px-5 h-screen">
+        <ScrollView>
+          <View className="flex flex-row items-center justify-between my-5">
+            <Text className="text-2xl font-JakartaExtraBold">
+              Welcome, {firstName} 👋
+            </Text>
+            <TouchableOpacity
+              onPress={() => setOpen(true)}
+              className="justify-center items-center w-10 h-10 rounded-full bg-white"
+            >
+              <Image source={icons.out} className="w-4 h-4" />
+            </TouchableOpacity>
+          </View>
+          <View className="space-y-3">
+            <Text className="text-center text-xl font-JakartaExtraBold mb-3">
+              Learn C Language
+            </Text>
+            <SummaryProgressCard
+              title={`Prepare by Topics`}
+              description="C"
+              buttonLabel="Continue Preparation"
+              progress={overallProgress}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
