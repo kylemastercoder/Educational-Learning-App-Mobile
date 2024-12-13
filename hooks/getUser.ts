@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { db } from "@/config/FirebaseConfig";
 import { useUser } from "@clerk/clerk-expo";
 import { collection, getDocs, query, where } from "firebase/firestore";
