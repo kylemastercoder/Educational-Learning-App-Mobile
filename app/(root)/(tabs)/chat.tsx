@@ -71,7 +71,7 @@ const Chat = () => {
     setHeight(height);
   };
 
-  if (!userData) return null;
+  if (!userData) return <Text>No User</Text>;
 
   return (
     <SafeAreaView className="flex-1 pb-[110px]">

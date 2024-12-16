@@ -19,6 +19,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { icons } from "@/constants";
 import { db } from "@/config/FirebaseConfig";
+import React from "react";
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -128,7 +129,7 @@ const Home = () => {
         <ScrollView>
           <View className="flex flex-row items-center justify-between my-5">
             <Text className="text-2xl font-JakartaExtraBold">
-              Welcome, {firstName} 👋
+              Welcome, {firstName || "Student"} 👋
             </Text>
             <TouchableOpacity
               onPress={() => setOpen(true)}

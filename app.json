@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Educational Web App",
-    "slug": "educational_webapp",
+    "name": "C Challenge",
+    "slug": "c_challenge",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/favicon.jpg",

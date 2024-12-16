@@ -101,7 +101,7 @@ const Profile = () => {
     }
   }, [userData]);
 
-  if (!userData) return null;
+  if (!userData) return <Text>No User</Text>;
 
   const handleImagePick = async () => {
     try {

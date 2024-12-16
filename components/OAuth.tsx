@@ -1,24 +1,56 @@
 /* eslint-disable prettier/prettier */
-import { useOAuth } from "@clerk/clerk-expo";
-import { router } from "expo-router";
+import { useOAuth, useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import { Alert, Image, Text, View } from "react-native";
 
 import CustomButton from "@/components/CustomButton";
 import { icons } from "@/constants";
-import { googleOAuth } from "@/lib/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/config/FirebaseConfig";
 
 const OAuth = () => {
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+  const { isLoaded } = useUser();
+  const router = useRouter();
+
+  const saveUserToFirebase = async (userId: string) => {
+    try {
+      const userDocRef = doc(db, "Users", userId);
+      // Save only the userId in Firestore
+      await setDoc(userDocRef, { clerkId: userId }, { merge: true });
+      console.log("User saved to Firebase successfully.");
+    } catch (error) {
+      console.error("Error saving user to Firebase:", error);
+      Alert.alert("Error", "Failed to save user data. Please try again.");
+    }
+  };
 
   const handleGoogleSignIn = async () => {
-    const result = await googleOAuth(startOAuthFlow);
-
-    if (result.code === "session_exists") {
-      Alert.alert("Success", "Session exists. Redirecting to home screen.");
-      router.replace("/(root)/(tabs)/home");
+    if (!isLoaded) {
+      Alert.alert("Error", "Clerk is not loaded. Please try again.");
+      return;
     }
 
-    Alert.alert(result.success ? "Success" : "Error", result.message);
+    try {
+      const result = await startOAuthFlow();
+
+      if (result && result.createdSessionId) {
+        console.log("OAuth completed successfully:", result);
+        const userId = result.createdSessionId;
+
+        // Save only the userId to Firebase
+        await saveUserToFirebase(userId);
+
+        Alert.alert("Success", "You are logged in successfully!");
+        router.replace("/(root)/(tabs)/home");
+      } else {
+        console.log("OAuth result:", result);
+        Alert.alert("Error", "OAuth process failed.");
+      }
+    } catch (error: any) {
+      console.error("Error during OAuth flow:", error);
+      Alert.alert("Error", "Google sign-in failed. Please try again.");
+    }
   };
 
   return (
