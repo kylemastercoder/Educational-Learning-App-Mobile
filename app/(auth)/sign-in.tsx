@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
-import OAuth from "@/components/OAuth";
 import { images } from "@/constants";
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, router } from "expo-router";
@@ -67,7 +66,6 @@ const SignIn = () => {
             onPress={onSignInPress}
             className="mt-6"
           />
-          <OAuth />
           <Link
             href="/sign-up"
             className="text-lg text-center text-general-200 mt-10"

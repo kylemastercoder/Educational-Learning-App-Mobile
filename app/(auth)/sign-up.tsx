@@ -4,7 +4,6 @@ import { Alert, Image, ScrollView, Text, View } from "react-native";
 import ReactNativeModal from "react-native-modal";
 import CustomButton from "@/components/CustomButton";
 import InputField from "@/components/InputField";
-import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
 import { calculateAge } from "@/lib/utils";
 import { useSignUp } from "@clerk/clerk-expo";
@@ -237,7 +236,6 @@ const SignUp = () => {
             className="mt-6"
             disabled={isLoading}
           />
-          <OAuth />
           <Link
             href="/sign-in"
             className="text-lg text-center text-general-200 mt-10"
