@@ -32,7 +32,14 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false); // State for editing mode
   const [isOpen, setIsOpen] = useState(false);
   const [quizResults, setQuizResults] = useState<
-    { studentId: any; quizId: any; quizScore: string }[]
+    {
+      studentId: any;
+      quizId: any;
+      quizScore: string;
+      correctAnswers: any[];
+      studentAnswers: any[];
+      timestamp: string;
+    }[]
   >([]);
 
   // State for form fields
@@ -67,6 +74,9 @@ const Profile = () => {
               studentId: data.userId,
               quizId: data.quizId,
               quizScore: `${data.score}/${data.howManyQuiz}`,
+              correctAnswers: data.correctAnswers,
+              studentAnswers: data.studentAnswers,
+              timestamp: data.timestamp,
             };
           });
 
@@ -184,12 +194,41 @@ const Profile = () => {
         <View className="flex-1 justify-center items-center bg-black/80">
           <View className="bg-white rounded-lg p-5 w-4/5">
             <Text className="text-xl font-bold">Quiz Results</Text>
-            <View className="mt-2 flex flex-col items-start justify-start">
+            <View className="mt-2 bg-zinc-100 p-2 flex flex-col items-start justify-start">
               {quizResults.length > 0 ? (
                 quizResults.map((result, index) => (
-                  <Text key={index} className="block mt-2">
-                    Quiz {index + 1}: {result.quizScore}
-                  </Text>
+                  <>
+                    <Text key={index} className="block text-lg font-bold">
+                      Quiz {index + 1}: {result.quizScore}
+                    </Text>
+                    <View className="flex flex-col">
+                      {quizResults.map((result, resultIndex) => (
+                        <View key={resultIndex} className="mb-3">
+                          {result.correctAnswers.map((correctAnswer, index) => {
+                            const studentAnswer = result.studentAnswers[index];
+                            const isCorrect = studentAnswer === correctAnswer;
+
+                            return (
+                              <View key={index} className="flex flex-col mt-3">
+                                <Text className="font-medium">
+                                  Question {index + 1}:
+                                </Text>
+                                <Text className={`ml-2 text-xs`}>
+                                  Correct Answer: {correctAnswer}
+                                </Text>
+                                <Text
+                                  className={`ml-2 text-white text-xs mt-1 px-2 py-1 rounded-md ${isCorrect ? "bg-green-500" : "bg-red-500"}`}
+                                >
+                                  Student Answer:{" "}
+                                  {studentAnswer || "No answer provided"}
+                                </Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      ))}
+                    </View>
+                  </>
                 ))
               ) : (
                 <Text className="mt-2">No quiz results found</Text>

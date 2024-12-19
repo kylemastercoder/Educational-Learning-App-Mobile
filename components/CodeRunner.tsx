@@ -95,15 +95,18 @@ int main() {
   const fetchExplanations = async (code: string) => {
     try {
       const explanation = await make_request(code);
-
       if (explanation) {
         const lineExplanations = explanation.split("\n");
         setExplanations(lineExplanations);
       } else {
+        console.error("Empty explanation received from make_request.");
         setExplanations(["No explanations available."]);
       }
     } catch (error) {
-      console.error("Error fetching explanations: ", error);
+      console.error("Error fetching explanations:", {
+        message: (error as any).message,
+        response: (error as any).response?.data,
+      });
       setExplanations(["Error fetching explanations"]);
     }
   };

@@ -147,17 +147,20 @@ const SpecificQuiz = () => {
       setIsAnswerSelected(false);
       setIsChoicesDisabled(false);
     } else {
-      saveScoreToFirebase(); // Save score before showing the modal
       setModalVisible(true); // Show modal only when the quiz is completed
     }
   };
 
-  const saveScoreToFirebase = async () => {
+  const saveScoreToFirebase = async (answers: string[]) => {
     const quizScoreData = {
       quizId: id,
       userId: userData?.clerkId,
       score: score,
       howManyQuiz: quizData?.howManyQuiz,
+      correctAnswers: answers.filter(
+        (answer, index) => answer === quizData?.questions[index].correctAnswer
+      ),
+      studentAnswers: answers,
       timestamp: new Date().toISOString(),
     };
     try {
@@ -218,8 +221,16 @@ const SpecificQuiz = () => {
       );
     }
 
-    // Wait for 5 seconds before going to the next question
-    setTimeout(goToNextQuestion, 5000);
+    // If this is the last question, save the score and answers
+    if (questionIndex === quizData!.questions.length - 1) {
+      setTimeout(() => {
+        saveScoreToFirebase(newSelectedAnswers);
+        setModalVisible(true);
+      }, 2000);
+    } else {
+      // Wait for 5 seconds before going to the next question
+      setTimeout(goToNextQuestion, 5000);
+    }
   };
 
   if (loading) {
@@ -293,6 +304,19 @@ const SpecificQuiz = () => {
               <View className="mt-5">
                 {quizData?.questions && quizData.questions.length > 0 && (
                   <View className="mt-2 px-1">
+                    <View className="w-full bg-gray-300 h-3 rounded-full overflow-hidden">
+                      <View
+                        style={{
+                          width: `${
+                            ((currentQuestionIndex + 1) /
+                              quizData.questions.length) *
+                            100
+                          }%`,
+                          backgroundColor: "#4CAF50",
+                          height: "100%",
+                        }}
+                      />
+                    </View>
                     <Text className="text-center font-[500] mt-3">
                       {currentQuestionIndex + 1}/{quizData.questions.length}
                     </Text>

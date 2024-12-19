@@ -198,7 +198,13 @@ const CourseList = () => {
       showsHorizontalScrollIndicator={false}
       renderItem={({ item }) => (
         <TouchableOpacity
-          onPress={() => router.push(`/course/${item.id}`)}
+          onPress={() => {
+            if (item.progress === 100) {
+              router.push(`/course/${item.id}`);
+            } else {
+              alert("Complete the current course to unlock this one.");
+            }
+          }}
           style={{ backgroundColor: "#fff", marginRight: 10, borderRadius: 10 }}
         >
           <View className="relative">
