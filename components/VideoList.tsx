@@ -85,53 +85,58 @@ const VideoList = () => {
       data={videos}
       horizontal={true}
       showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          onPress={() => {
-            if (!item.isLocked) {
-              router.push(`/videos/${item.id}`);
-            } else {
-              alert("Complete the current video to unlock this one.");
-            }
-          }}
-          style={{
-            backgroundColor: "#fff",
-            marginRight: 10,
-            borderRadius: 10,
-            opacity: item.isLocked ? 0.6 : 1,
-          }}
-        >
-          <View
-            className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 ? "bg-green-500" : "bg-red-500"} z-50`}
-          >
-            <Text className="font-semibold text-[12px] text-white">
-              {item.progress === 100 ? "Completed" : "Not Completed"}
-            </Text>
-          </View>
-          <Image
-            source={{ uri: item.thumbnail }}
-            style={{
-              width: 210,
-              height: 120,
-              borderTopRightRadius: 10,
-              borderTopLeftRadius: 10,
+      renderItem={({ item, index }) => {
+        const isFirstVideo = index === 0;
+        const previousVideoCompleted =
+          index === 0 || (index > 0 && videos[index - 1].progress === 100);
+        return (
+          <TouchableOpacity
+            onPress={() => {
+              if (isFirstVideo || previousVideoCompleted) {
+                router.push(`/videos/${item.id}`);
+              } else {
+                alert("Complete the current video to unlock this one.");
+              }
             }}
-          />
-          <View style={{ padding: 10 }}>
-            <Text style={{ width: 150, fontSize: 14 }}>{item.name}</Text>
-            <Text
-              style={{
-                marginTop: 3,
-                fontSize: 12,
-                fontWeight: "bold",
-                color: "gray",
-              }}
+            style={{
+              backgroundColor: "#fff",
+              marginRight: 10,
+              borderRadius: 10,
+              opacity: isFirstVideo || previousVideoCompleted ? 1 : 0.5,
+            }}
+          >
+            <View
+              className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 ? "bg-green-500" : "bg-red-500"} z-50`}
             >
-              From: {item.method}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      )}
+              <Text className="font-semibold text-[12px] text-white">
+                {item.progress === 100 ? "Completed" : "Not Completed"}
+              </Text>
+            </View>
+            <Image
+              source={{ uri: item.thumbnail }}
+              style={{
+                width: 210,
+                height: 120,
+                borderTopRightRadius: 10,
+                borderTopLeftRadius: 10,
+              }}
+            />
+            <View style={{ padding: 10 }}>
+              <Text style={{ width: 150, fontSize: 14 }}>{item.name}</Text>
+              <Text
+                style={{
+                  marginTop: 3,
+                  fontSize: 12,
+                  fontWeight: "bold",
+                  color: "gray",
+                }}
+              >
+                From: {item.method}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        );
+      }}
     />
   );
 };

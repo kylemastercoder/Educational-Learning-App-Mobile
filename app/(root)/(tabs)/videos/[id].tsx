@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
 import {
@@ -27,6 +28,7 @@ import Video, { VideoRef } from "react-native-video";
 import RenderHTML from "react-native-render-html";
 import { extractVideoId } from "@/lib/utils";
 import { useGetUser } from "@/hooks/getUser";
+import * as Updates from "expo-updates";
 
 interface VideoContent {
   id: string;
@@ -136,6 +138,10 @@ const SpecificVideo = () => {
         videoId: videoId,
         userId: arrayUnion(userId), // This will add the userId to the array if it doesn't exist
       });
+      setTimeout(async () => {
+        await Updates.reloadAsync();
+      }, 5000);
+      ToastAndroid.show("Video viewed successfully", ToastAndroid.SHORT);
     } catch (error) {
       console.error("Error tracking video view:", error);
     }

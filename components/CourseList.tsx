@@ -196,93 +196,108 @@ const CourseList = () => {
       data={courses}
       horizontal={true}
       showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          onPress={() => {
-            if (item.progress === 100) {
-              router.push(`/course/${item.id}`);
-            } else {
-              alert("Complete the current course to unlock this one.");
-            }
-          }}
-          style={{ backgroundColor: "#fff", marginRight: 10, borderRadius: 10 }}
-        >
-          <View className="relative">
-            <View
-              className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${item.progress === 100 && item.quizTaken ? "bg-green-500" : "bg-red-500"} z-50`}
-            >
-              <Text className="font-semibold text-[12px] text-white">
-                {item.progress === 100 && item.quizTaken
-                  ? "Completed"
-                  : "Not Completed"}
-              </Text>
-            </View>
-            <Image
-              source={{ uri: item.imageUrl }}
-              style={{
-                width: 210,
-                height: 120,
-                borderTopRightRadius: 10,
-                borderTopLeftRadius: 10,
-              }}
-            />
-          </View>
-          <View style={{ padding: 10 }}>
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ width: 150, fontSize: 14 }}
-            >
-              {item.name}
-            </Text>
-            <Text
-              style={{
-                marginTop: 3,
-                fontSize: 12,
-                fontWeight: "bold",
-                color: "gray",
-              }}
-            >
-              {item.moduleCount} topics
-            </Text>
-            <View className="w-full h-2 bg-gray-300 rounded-full mt-2">
+      renderItem={({ item, index }) => {
+        const isFirstCourse = index === 0;
+        const previousCourseCompleted =
+          index === 0 || (index > 0 && courses[index - 1].progress === 100);
+
+        return (
+          <TouchableOpacity
+            onPress={() => {
+              if (isFirstCourse || previousCourseCompleted) {
+                router.push(`/course/${item.id}`);
+              } else {
+                alert("Complete the previous course to unlock this one.");
+              }
+            }}
+            style={{
+              backgroundColor: "#fff",
+              marginRight: 10,
+              borderRadius: 10,
+              opacity: isFirstCourse || previousCourseCompleted ? 1 : 0.5,
+            }}
+          >
+            <View className="relative">
               <View
-                style={{ width: `${item.progress}%` }} // Set progress width based on calculated progress
-                className="h-full bg-green-500 rounded-full"
+                className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${
+                  item.progress === 100 && item.quizTaken
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                } z-50`}
+              >
+                <Text className="font-semibold text-[12px] text-white">
+                  {item.progress === 100 && item.quizTaken
+                    ? "Completed"
+                    : "Not Completed"}
+                </Text>
+              </View>
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={{
+                  width: 210,
+                  height: 120,
+                  borderTopRightRadius: 10,
+                  borderTopLeftRadius: 10,
+                }}
               />
             </View>
-            <Text className="self-start text-xs mt-1">{item.progress}%</Text>
-            <TouchableOpacity
-              onPress={() =>
-                item.progress === 100 &&
-                item.quiz &&
-                !item.quizTaken &&
-                router.push(`/quizzes/${item.quiz[0].id}`)
-              }
-            >
+            <View style={{ padding: 10 }}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ width: 150, fontSize: 14 }}
+              >
+                {item.name}
+              </Text>
               <Text
                 style={{
-                  color: "#fff",
-                  backgroundColor:
-                    item.quizTaken || item.progress !== 100 || !item.quiz
-                      ? "#777"
-                      : "#22c55e", // Disabled color if quiz is taken or course is not completed
-                  padding: 5,
-                  borderRadius: 5,
-                  textAlign: "center",
-                  marginTop: 5,
+                  marginTop: 3,
+                  fontSize: 12,
+                  fontWeight: "bold",
+                  color: "gray",
                 }}
               >
-                {item.quizTaken
-                  ? "Quiz Taken"
-                  : item.progress === 100 || item.quiz
-                    ? "Take Assessment"
-                    : "No Quiz Available"}
+                {item.moduleCount} topics
               </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      )}
+              <View className="w-full h-2 bg-gray-300 rounded-full mt-2">
+                <View
+                  style={{ width: `${item.progress}%` }}
+                  className="h-full bg-green-500 rounded-full"
+                />
+              </View>
+              <Text className="self-start text-xs mt-1">{item.progress}%</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  item.progress === 100 &&
+                  item.quiz &&
+                  !item.quizTaken &&
+                  router.push(`/quizzes/${item.quiz[0].id}`)
+                }
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    backgroundColor:
+                      item.quizTaken || item.progress !== 100 || !item.quiz
+                        ? "#777"
+                        : "#22c55e",
+                    padding: 5,
+                    borderRadius: 5,
+                    textAlign: "center",
+                    marginTop: 5,
+                  }}
+                >
+                  {item.quizTaken
+                    ? "Quiz Taken"
+                    : item.progress === 100 || item.quiz
+                      ? "Take Assessment"
+                      : "No Quiz Available"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        );
+      }}
     />
   );
 };
