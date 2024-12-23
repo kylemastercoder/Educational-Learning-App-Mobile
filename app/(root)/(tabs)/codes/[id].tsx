@@ -31,6 +31,7 @@ interface CodeContent {
   id: string;
   title: string;
   description: string;
+  programmingLanguage: string;
   correctOutput: string;
 }
 
@@ -143,7 +144,10 @@ const SpecificCode = () => {
               h1: { marginTop: 0 },
             }}
           />
-          <CodeRunner correctOutput={codeData?.correctOutput || ""} />
+          <CodeRunner
+            programmingLanguage={codeData?.programmingLanguage || ""}
+            correctOutput={codeData?.correctOutput || ""}
+          />
         </View>
       </ScrollView>
     </>

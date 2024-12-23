@@ -140,11 +140,11 @@ const Home = () => {
           </View>
           <View className="space-y-3">
             <Text className="text-center text-xl font-JakartaExtraBold mb-3">
-              Learn C Language
+              Learn C, C++ and C# Programming Language
             </Text>
             <SummaryProgressCard
               title={`Prepare by Topics`}
-              description="C"
+              description="C, C++, C#"
               buttonLabel="Continue Preparation"
               progress={overallProgress}
             />

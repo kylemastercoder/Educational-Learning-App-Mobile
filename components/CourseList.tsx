@@ -220,13 +220,13 @@ const CourseList = () => {
             <View className="relative">
               <View
                 className={`absolute top-0 right-0 rounded-lg px-2 py-1 ${
-                  item.progress === 100 && item.quizTaken
+                  item.progress === 100 || item.quizTaken
                     ? "bg-green-500"
                     : "bg-red-500"
                 } z-50`}
               >
                 <Text className="font-semibold text-[12px] text-white">
-                  {item.progress === 100 && item.quizTaken
+                  {item.progress === 100 || item.quizTaken
                     ? "Completed"
                     : "Not Completed"}
                 </Text>

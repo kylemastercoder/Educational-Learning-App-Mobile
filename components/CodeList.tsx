@@ -10,6 +10,7 @@ interface CodeContent {
   id: string;
   title: string;
   description: string;
+  programmingLanguage: string;
   thumbnail: string;
 }
 
@@ -35,6 +36,7 @@ const CodeList = () => {
                 title: codeData.title,
                 description: codeData.description,
                 thumbnail: codeData.thumbnail,
+                programmingLanguage: codeData.programmingLanguage,
               };
             })
           );
@@ -60,8 +62,27 @@ const CodeList = () => {
             backgroundColor: "#fff",
             marginRight: 10,
             borderRadius: 10,
+            position: "relative",
           }}
         >
+          <View
+            className={`absolute z-50 top-0 right-0 rounded-lg px-2 py-1 ${
+              item.programmingLanguage === "c"
+                ? "bg-green-500"
+                : item.programmingLanguage === "c#"
+                  ? "bg-blue-500"
+                  : "bg-orange-500"
+            }`}
+          >
+            <Text className="font-semibold text-[12px] text-white">
+              {item.programmingLanguage === "c"
+                ? "C Language"
+                : item.programmingLanguage === "c#"
+                  ? "C# Language"
+                  : "C++ Language"}
+            </Text>
+          </View>
+
           <Image
             source={{ uri: item.thumbnail }}
             style={{
