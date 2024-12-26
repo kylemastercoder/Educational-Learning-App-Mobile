@@ -21,12 +21,21 @@ import { icons } from "@/constants";
 import { db } from "@/config/FirebaseConfig";
 import React from "react";
 
+interface Settings {
+  id: string;
+  title: string;
+  subTitle: string;
+  content: string;
+}
+
 const Home = () => {
   const [open, setOpen] = useState(false);
   const { userData } = useGetUser();
   const firstName = userData?.name.split(" ")[0];
   const { signOut } = useAuth();
   const [overallProgress, setOverallProgress] = useState(0);
+
+  const [settingsData, setSettingsData] = useState<Settings[]>([]);
 
   if (userData?.status === "Rejected") {
     ToastAndroid.show(
@@ -38,6 +47,30 @@ const Home = () => {
   }
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsQuery = query(collection(db, "Settings"));
+        const settingsSnapshot = await getDocs(settingsQuery);
+
+        if (!settingsSnapshot.empty) {
+          const settingDocs = await Promise.all(
+            settingsSnapshot.docs.map(async (doc) => {
+              const settingsData = doc.data();
+              return {
+                id: doc.id,
+                title: settingsData.title,
+                subTitle: settingsData.subTitle,
+                content: settingsData.content,
+              };
+            })
+          );
+          setSettingsData(settingDocs);
+        }
+      } catch (error) {
+        console.error("Error fetching settings: ", error);
+      }
+    };
+
     const calculateOverallProgress = async () => {
       try {
         // 1. Get total courses
@@ -84,6 +117,7 @@ const Home = () => {
     };
 
     calculateOverallProgress();
+    fetchSettings();
   }, [userData]);
 
   useEffect(() => {
@@ -140,11 +174,12 @@ const Home = () => {
           </View>
           <View className="space-y-3">
             <Text className="text-center text-xl font-JakartaExtraBold mb-3">
-              Learn C, C++ and C# Programming Language
+              {settingsData[0]?.title}
             </Text>
             <SummaryProgressCard
-              title={`Prepare by Topics`}
-              description="C, C++, C#"
+              title={settingsData[0]?.title}
+              subTitle={settingsData[0]?.subTitle}
+              content={settingsData[0]?.content}
               buttonLabel="Continue Preparation"
               progress={overallProgress}
             />

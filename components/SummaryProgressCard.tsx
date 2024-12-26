@@ -6,29 +6,23 @@ import { View, Text, TouchableOpacity } from "react-native";
 const SummaryProgressCard = ({
   progress,
   title,
-  description,
+  subTitle,
   buttonLabel,
   className,
+  content,
 }: {
   progress: number;
   title: string;
-  description: string;
+  subTitle: string;
   buttonLabel: string;
+  content: string;
   className?: string;
 }) => {
   return (
     <View className={`border border-gray-300 rounded-md p-4 ${className}`}>
-      <Text className="text-base font-semibold mb-2">{title}</Text>
-      <Text className="text-2xl font-bold">{description}</Text>
-      <Text className="text-xs text-justify text-muted-foreground">
-        Ready to conquer the world of programming? Our C programming course
-        provides a comprehensive and engaging learning experience, designed to
-        guide you from beginner to expert. Learn from clear explanations,
-        interactive exercises, and engaging video lectures. Test your knowledge
-        with our robust quiz system and challenge yourself with practical coding
-        exercises. Our course equips you with the essential tools to master C
-        programming and unlock a world of exciting career opportunities in
-        software development.
+      <Text className="text-base font-semibold mb-2">{subTitle}</Text>
+      <Text className="text-xs text-left text-muted-foreground mb-2">
+        {content}
       </Text>
 
       <View className="w-full h-2 bg-gray-300 rounded-full">
