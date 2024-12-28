@@ -79,7 +79,7 @@ const SpecificQuiz = () => {
               const questions = quizData.questions.map((question: any) => ({
                 answers: Array.isArray(question.answers)
                   ? question.answers
-                  : question.answers.split(", "),
+                  : question.answers.split("| "),
                 correctAnswer: question.correctAnswer,
                 question: question.question,
               }));
